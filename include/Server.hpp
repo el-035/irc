@@ -40,7 +40,7 @@ class Server
     void SendDataToClient(int client_fd); //Sends data from the client's write buffer to the client socket, and handles any errors
     ~Server();
 
-    private: 
+    private:
         std::map<int, Client>   _clients;
         std::vector<pollfd>     _pollfds;// List of pollfd structures for monitoring server and client sockets
         int                     _port;

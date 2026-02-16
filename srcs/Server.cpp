@@ -46,13 +46,13 @@ void Server::ServerStart()
 				if (newDataIs(i) == NEW_CLIENT) {
 					AddNewClient();
 				} else if (newDataIs(i) == EXISTING_CLIENT)
-                {
-                    if (readClientsData(i) == EMPTY_READ)
-                    {
-                        DisconnectClient(i);
-                        --i;
-                        continue;
-                    }
+				{
+					if (readClientsData(i) == EMPTY_READ)
+					{
+						DisconnectClient(i);
+						--i;
+						continue;
+					}
 					
 					cmdHandler.processNewData(_clients[_pollfds[i].fd]);
 	
@@ -69,7 +69,7 @@ void Server::ServerStart()
 				writeToClient(_clients[_pollfds[i].fd]);
 			}
 		}
-    }
+	}
 }
 
 
