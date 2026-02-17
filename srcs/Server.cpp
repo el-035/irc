@@ -8,8 +8,11 @@
 
 #include "../include/Server.hpp"
 #include "../include/CommandHandler.hpp"
+#include "../include/main.hpp"
 
+#include <csignal>
 #include <iostream>
+#include <sys/signal.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <fcntl.h>
@@ -17,16 +20,34 @@
 #include <unistd.h>
 #include <vector>
 
+volatile sig_atomic_t g_server_stop = 0;
+
 Server::Server(int port, const std::string& password) : _port(port), _password(password)
 {
 }   
 
+void handle_signal (int sig)
+{
+	(void)sig;
+	g_server_stop = 1;
+}
+
+void signalSetup(void)
+{
+	struct sigaction sa;
+	sa.sa_handler = handle_signal;
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = 0;
+	if (sigaction(SIGINT, &sa, NULL) == -1)
+		return ;
+}
 
 void Server::ServerStart()
 {
+	signalSetup();// ! handle possibilty of sigaction failure!
 	CommandHandler cmdHandler(_clients, _password);
 
-	while (true)
+	while (g_server_stop == 0)
 	{
 		updatePollEvents();
 		if (poll(&_pollfds[0], _pollfds.size(), -1) == -1) break;

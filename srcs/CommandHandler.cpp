@@ -140,27 +140,51 @@ void CommandHandler::casePASS(Client &client, std::vector<std::string> &cmdToken
 		client.setAuthenticated(true);
 	}
 }
+/*
+!Split message into tokens!
+!Then fetch vector of ids of persons in interest
+!if any reason not to send text -> write error str to buffer! 
+!else append to all in vector list of fds message!
+
+*/
+
+bool isChannel(const std::string& target)
+{
+	if (target.empty())
+		return false;
+	std::string prefixes = "#&!+";
+	
+	if (prefixes.find(target[0]) != std::string::npos)
+	{
+        return true;
+    }
+    return false;
+}
 
 void CommandHandler::casePRIVMSG(Client &client, std::vector<std::string> &cmdTokens)
 {
-	 if (cmdTokens.size() < 3) return; // Not enough parameters for PRIVMSG
+	if (cmdTokens.size() < 3) return;
 	std::string targetName = cmdTokens[1];
-	std::string content = cmdTokens[2]; // Your parser's trailing part
-	int target_fd = findUsingName(targetName);
-	//_channelControl.fetchChannelMembers(cmdTokens[1]);//* smth like this!
-	//! if its a channel (second param starts with #) : then I need fd-s of all ppl inside channel!
-	if (target_fd != -1)
-	{
-		// Format: :SourceNick!User@Host PRIVMSG Target :Content
-		std::string relay = ":" + client.getNickname() + "!" + client.getUsername() 
-						  + "@localhost PRIVMSG " + targetName + " :" + content + "\r\n";
-		_clients[target_fd].appendToWriteBuffer(relay); // Also add to target's buffer for POLLOUT
-	}
+	std::string content = cmdTokens[2];
+	std::vector<int> fds;
+
+	if (isChannel(targetName))
+		fds = _channelControl.fetchChannelMembers(targetName);
 	else
+		fds.push_back(findUsingName(targetName));
+
+	if (fds.empty() || fds[0] == -1)
 	{
-		client.appendToWriteBuffer(":localhost 401 " + client.getNickname() + " " + targetName + " :No such nick/channel\r\n");//! Doenst work as of yet
+		std::cout << "Cannot find user!!!\n\n" << std::endl; 
+		client.appendToWriteBuffer(":localhost 401 " + client.getNickname() + " " + targetName + " :No such nick/channel\r\n");
 		return;
 	}
+	for (std::vector<int>::iterator it = fds.begin(); it != fds.end(); ++it)
+	{
+		std::string relay = ":" + client.getNickname() + "!" + client.getUsername() 
+							+ "@localhost PRIVMSG " + targetName + " :" + content + "\r\n";//! check how targetname deals with channels
+		_clients[*it].appendToWriteBuffer(relay);
+    }
 }
 
 void CommandHandler::casePING(Client &client, std::vector<std::string> &cmdTokens)
@@ -240,7 +264,7 @@ void CommandHandler::chatCommands(std::vector<std::string> &cmdTokens, Client &c
 		case MODE:
 			caseMODE(client, cmdTokens);
 			break;
-		case PRIVMSG:
+		case PRIVMSG://* FOR ALL MESSAGES -> both channel or private goes through here!
 			casePRIVMSG(client, cmdTokens);
 			break;
 		case UNKNOWN:
@@ -259,15 +283,11 @@ void CommandHandler::processNewData(Client &client)
 		std::vector<std::string> cmdTokens = extractCommand(client.getReadBuffer());
 		if (cmdTokens.empty()) continue;
 
-		std::cout << "CMD: " << cmdTokens[0] << std::endl;
+		std::cout << "CMD: " << cmdTokens[0] << std::endl;//* remove later, testing only
 
 		if (!client.getRegistered()) 
-		{
 			clientRegister(client, cmdTokens);
-		}
 		else 
-		{
 			chatCommands(cmdTokens, client);
-		}
 	}
 }
