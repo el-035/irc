@@ -2,52 +2,111 @@
 #define COMMANDHANDLER_HPP
 
 #include "Client.hpp"
-#include "ChannelControl.hpp"
+//#include "ChannelControl.hpp"
 #include <map>
 #include <vector>
 #include <string>
+#include <list>
 
 enum ClientCommand {
-    NICK,
-    CAP,
-    USER,
-    PASS,
-    JOIN,
-    PRIVMSG,
-    PING,
-    KICK,
-    INVITE,
-    TOPIC,
-    MODE,
-    OPER,
-    UNKNOWN
+	NICK,
+	CAP,
+	USER,
+	PASS,
+	JOIN,
+	PRIVMSG,
+	PING,
+	KICK,
+	INVITE,
+	TOPIC,
+	MODE,
+	OPER,
+	UNKNOWN
+};
+
+enum ChannelModes {
+	INV,
+	TOP,
+	KEY,
+	OPE,
+	LIM
+};
+
+struct Channel
+{
+	std::string 					name; //double??
+	std::string 					topic;
+	std::map<ChannelModes, bool> 	mode;
+	std::list<int> 					invited; 	//fro invide only mode, we know who has been invited
+	size_t							limit;
+	std::string 					key;
+	std::map<int, bool> 			clients; //int fd and bool isOperator
 };
 
 class CommandHandler
 {
-    private:
-        std::map<int, Client>&      _clients; 
-        std::string                 _password;
-        ChannelControl              _channelControl;
+	private:
+		std::map<int, Client>&	  		_clients;
+		std::string				 		_password;
+		//ChannelControl			 		 _channelControl;	//DELETE
+		std::map<std::string, Channel> 	_channels; // Map of channel name to Channel struct
 
-        void sendWelcome(Client &client);
-        void casePRIVMSG(Client &client, std::vector<std::string> &cmdTokens);
-        void caseNICK(Client &client, std::vector<std::string> &cmdTokens);
-        void caseUSER(Client &client, std::vector<std::string> &cmdTokens);
-        void casePASS(Client &client, std::vector<std::string> &cmdTokens);
-        void  clientRegister(Client &client, std::vector<std::string> &cmdTokens);
-        void casePING(Client &client, std::vector<std::string> &cmdTokens);
-        void caseUNKNOWN(Client &client, std::vector<std::string> &cmdTokens);
-        void chatCommands(std::vector<std::string> &cmdTokens, Client &client);
-        void caseCAP(Client &client, std::vector<std::string> &cmdTokens);
-        std::vector<std::string> extractCommand(std::string& buffer);
-        bool commandComplete(const std::string& buffer);
-        int cmdType(const std::string& cmd);
-    public:
-        CommandHandler(std::map<int, Client> &clients, const std::string& password) : _clients(clients), _password(password), _channelControl() {}
-        void processNewData(Client &client);
-        int findUsingName(std::string name);
-		//ortodox canonical form?
+
+		void sendWelcome(Client &client);
+		void casePRIVMSG(Client &client, std::vector<std::string> &cmdTokens);
+		void caseNICK(Client &client, std::vector<std::string> &cmdTokens);
+		void caseUSER(Client &client, std::vector<std::string> &cmdTokens);
+		void casePASS(Client &client, std::vector<std::string> &cmdTokens);
+		void  clientRegister(Client &client, std::vector<std::string> &cmdTokens);
+		void casePING(Client &client, std::vector<std::string> &cmdTokens);
+		void caseUNKNOWN(Client &client, std::vector<std::string> &cmdTokens);
+		void chatCommands(std::vector<std::string> &cmdTokens, Client &client);
+		void caseCAP(Client &client, std::vector<std::string> &cmdTokens);
+		std::vector<std::string> extractCommand(std::string& buffer);
+		bool commandComplete(const std::string& buffer);
+		int cmdType(const std::string& cmd);
+		
+		
+		void caseKICK(Client &client, std::vector<std::string> &cmdTokens);
+		void caseINVITE(Client &client, std::vector<std::string> &cmdTokens);
+		void caseTOPIC(Client &client, std::vector<std::string> &cmdTokens);
+		void caseJOIN(Client &client, std::vector<std::string> &cmdTokens);
+		bool channelSyntax(const std::string& name);
+		int getClientFdFromNick(std::string& Nickname);
+		std::vector <int> fetchChannelMembers(std::string channelName);//* returns filled up vector list with all fd-s associated with a channel! if Channel doesnt exits, return list with only 1 member and its value is -1
+		
+		
+	public:
+		CommandHandler(std::map<int, Client> &clients, const std::string& password) : _clients(clients), _password(password)/*,  _channelControl() */ {}
+		void processNewData(Client &client);
+		int findUsingName(std::string name);
+
+
 };
+
+#define ERR_NEEDMOREPARAMS		461
+#define ERR_NOSUCHCHANNEL		403
+#define ERR_CHANOPRIVSNEEDED	482
+#define ERR_NOSUCHNICK			401
+#define ERR_NOTONCHANNEL		442
+#define ERR_USERNOTINCHANNEL	441
+#define ERR_USERONCHANNEL		443
+#define ERR_BADCHANMASK			476
+#define ERR_INVITEONLYCHAN		473
+#define ERR_BADCHANNELKEY		475
+#define ERR_CHANNELISFULL		471
+
+#define MSG_NEEDMOREPARAMS		" :Not enough parameters\r\n"
+#define MSG_NOSUCHCHANNEL		" :No such channel\r\n"
+#define MSG_CHANOPRIVSNEEDED	" :You're not channel operator\r\n"
+#define MSG_NOSUCHNICK			" :No such nick/channel\r\n"
+#define MSG_NOTONCHANNEL		" :You're not on that channel\r\n"
+#define MSG_USERNOTINCHANNEL	" :They aren't on that channel\r\n"
+#define MSG_USERONCHANNEL		" :is already on channel\r\n"
+#define MSG_BADCHANMASK			" :Bad Channel Mask\r\n"
+#define MSG_INVITEONLYCHAN		" :Cannot join channel (+i)\r\n"
+#define MSG_BADCHANNELKEY		" :Cannot join channel (+k)\r\n"
+#define MSG_CHANNELISFULL		" :Cannot join channel (+l)\r\n"
+
 
 #endif

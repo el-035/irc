@@ -5,7 +5,7 @@
 
 #include "../include/Client.hpp"
 #include "../include/CommandHandler.hpp"
-#include "../include/ChannelControl.hpp"
+//#include "../include/ChannelControl.hpp"
 
 #include <iostream>
 #include <sys/socket.h>
@@ -169,7 +169,7 @@ void CommandHandler::casePRIVMSG(Client &client, std::vector<std::string> &cmdTo
 	std::vector<int> fds;
 
 	if (isChannel(targetName))
-		fds = _channelControl.fetchChannelMembers(targetName);
+		fds = fetchChannelMembers(targetName);
 	else
 		fds.push_back(findUsingName(targetName));
 
@@ -250,16 +250,20 @@ void CommandHandler::chatCommands(std::vector<std::string> &cmdTokens, Client &c
 			// Not implemented yet
 			break;
 		case JOIN:
-			_channelControl.channelJoin(cmdTokens[1], client.getFd());
+			caseJOIN(client, cmdTokens);
+//			_channelControl.channelJoin(cmdTokens[1], client.getFd());
 			break;
 		case KICK:
-			_channelControl.ejectClientFromChannel(cmdTokens[1], client.getFd());
+			caseKICK(client, cmdTokens);
+			//_channelControl.ejectClientFromChannel(cmdTokens[1], client.getFd());
 			break;
 		case INVITE:
-			_channelControl.inviteClientToChannel(cmdTokens[1], client.getFd());
+			caseINVITE(client, cmdTokens);
+			//_channelControl.inviteClientToChannel(cmdTokens[1], client.getFd());
 			break;
 		case TOPIC:
-			_channelControl.setChannelTopic(cmdTokens[1], cmdTokens[2]);
+			caseTOPIC(client, cmdTokens);
+			//_channelControl.setChannelTopic(cmdTokens[1], cmdTokens[2]);
 			break;
 		case MODE:
 			caseMODE(client, cmdTokens);
@@ -291,3 +295,4 @@ void CommandHandler::processNewData(Client &client)
 			chatCommands(cmdTokens, client);
 	}
 }
+

@@ -7,6 +7,11 @@ int CommandHandler::cmdType(const std::string& cmd)
     if (cmd == "USER") return USER;
     if (cmd == "PASS") return PASS;
     if (cmd == "JOIN") return JOIN;
+    if (cmd == "INVITE") return INVITE;
+    if (cmd == "KICK") return KICK;
+    if (cmd == "TOPIC") return TOPIC;
+
+
     if (cmd == "PRIVMSG") return PRIVMSG;
     if (cmd == "PING") return PING;
     return UNKNOWN;
