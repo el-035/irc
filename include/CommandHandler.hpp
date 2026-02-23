@@ -34,7 +34,7 @@ enum ChannelModes {
 
 struct Channel
 {
-	std::string 					name; //double??
+	std::string 					name; //useless
 	std::string 					topic;
 	std::map<ChannelModes, bool> 	mode;
 	std::list<int> 					invited; 	//fro invide only mode, we know who has been invited

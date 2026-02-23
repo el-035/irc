@@ -137,17 +137,14 @@ void CommandHandler::caseINVITE(Client &client, std::vector<std::string> &cmdTok
 //TOPIC channel [topic]
 void CommandHandler::caseTOPIC(Client &client, std::vector<std::string> &cmdTokens){
 	try{
-		std::cout << "1\n";
 		//check min 2 tokens
 		if (cmdTokens.size() < 2)
 			throw(errMsg(ERR_NEEDMOREPARAMS, client.getNickname(), cmdTokens[0], MSG_NEEDMOREPARAMS , ""));
-		std::cout << "2\n";
 		
 		//check if channel exists
 		std::map<std::string, Channel>::iterator curChan = _channels.find(cmdTokens[1]);
 		if (curChan == _channels.end())
 			throw(errMsg(ERR_NOSUCHCHANNEL, client.getNickname(), cmdTokens[1], MSG_NOSUCHCHANNEL, ""));
-		std::cout << "3\n";
 		
 		//check if client is part of channel
 		std::map<int, bool>::iterator curClien = curChan->second.clients.find(client.getFd());
@@ -156,19 +153,20 @@ void CommandHandler::caseTOPIC(Client &client, std::vector<std::string> &cmdToke
 		
 		// if 2 tokens -_>show topic
 		if (cmdTokens.size() == 2){
+			
 			if (!curChan->second.topic.empty()){
 				std::string reply = ":ircserv 332 " + client.getNickname() + " " + cmdTokens[1] + " :" + curChan->second.topic + "\r\n";
 				client.appendToWriteBuffer(reply);
 			}
 			else{
-				std::string reply = ":ircserv 331 " + client.getNickname() + " " + cmdTokens[1] + " :No topic is set\r\n\r\n";
+				std::string reply = ":ircserv 331 " + client.getNickname() + " " + cmdTokens[1] + " :No topic is set\r\n";
 				client.appendToWriteBuffer(reply);
 			}
 			return ;
 		}
 
 		//if more check operator permission for changing topic
-		else if (cmdTokens.size() >= 3){
+		else if (cmdTokens.size() >= 3){	
 			if (curChan->second.mode[TOP] == true){
 				if (curClien->second == false)
 					throw(errMsg(ERR_CHANOPRIVSNEEDED, client.getNickname(), cmdTokens[1], MSG_CHANOPRIVSNEEDED, ""));
@@ -176,8 +174,8 @@ void CommandHandler::caseTOPIC(Client &client, std::vector<std::string> &cmdToke
 		}
 
 		//change topic
-		std::string topic = cmdTokens[3];
-		for (size_t i = 4; i < cmdTokens.size(); i++)
+		std::string topic = cmdTokens[2];
+		for (size_t i = 3; i < cmdTokens.size(); i++)
 			topic += " " + cmdTokens[i];
 		curChan->second.topic = topic;
 		topic = " :" + topic + "\r\n";
@@ -220,7 +218,7 @@ void CommandHandler::caseJOIN(Client &client, std::vector<std::string> &cmdToken
 		std::map<std::string, Channel>::iterator curChan = _channels.find(cmdTokens[1]);
 		bool chanCreated = false;
 		if (curChan == _channels.end())	{
-			//create channel
+			//create channel		//SET EVERYTIHNF BITTE
 			_channels[cmdTokens[1]];
 			chanCreated = true;
 			curChan = _channels.find(cmdTokens[1]);
