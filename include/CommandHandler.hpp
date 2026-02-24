@@ -28,7 +28,6 @@ enum ChannelModes {
 	INV,
 	TOP,
 	KEY,
-	OPE,
 	LIM
 };
 
@@ -57,7 +56,7 @@ class CommandHandler
 		void caseNICK(Client &client, std::vector<std::string> &cmdTokens);
 		void caseUSER(Client &client, std::vector<std::string> &cmdTokens);
 		void casePASS(Client &client, std::vector<std::string> &cmdTokens);
-		void  clientRegister(Client &client, std::vector<std::string> &cmdTokens);
+		void clientRegister(Client &client, std::vector<std::string> &cmdTokens);
 		void casePING(Client &client, std::vector<std::string> &cmdTokens);
 		void caseUNKNOWN(Client &client, std::vector<std::string> &cmdTokens);
 		void chatCommands(std::vector<std::string> &cmdTokens, Client &client);
@@ -66,7 +65,7 @@ class CommandHandler
 		bool commandComplete(const std::string& buffer);
 		int cmdType(const std::string& cmd);
 		
-		
+		void caseMODE(Client &client, std::vector<std::string> &cmdTokens);	
 		void caseKICK(Client &client, std::vector<std::string> &cmdTokens);
 		void caseINVITE(Client &client, std::vector<std::string> &cmdTokens);
 		void caseTOPIC(Client &client, std::vector<std::string> &cmdTokens);
@@ -74,6 +73,9 @@ class CommandHandler
 		bool channelSyntax(const std::string& name);
 		int getClientFdFromNick(std::string& Nickname);
 		std::vector <int> fetchChannelMembers(std::string channelName);//* returns filled up vector list with all fd-s associated with a channel! if Channel doesnt exits, return list with only 1 member and its value is -1
+		bool validateModeToken(std::vector<std::string>& cmdTokens);
+		void	sendModes(Client& client, std::string& chanName, Channel& curChan);
+		std::string changeModes(std::vector<std::string>& cmdTokens, Channel& curChan);
 		
 		
 	public:

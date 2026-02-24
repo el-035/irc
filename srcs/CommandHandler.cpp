@@ -224,12 +224,12 @@ void  CommandHandler::clientRegister(Client &client, std::vector<std::string> &c
 			return;
 	}
 }
-void caseMODE(Client& client, std::vector<std::string>& cmdTokens)
+/* void caseMODE(Client& client, std::vector<std::string>& cmdTokens)
 {
 	(void)client;
 	(void)cmdTokens;
 	std::cout << "ignoring mode for now!" << std::endl;
-}
+} */
 
 void CommandHandler::chatCommands(std::vector<std::string> &cmdTokens, Client &client)
 {
@@ -266,6 +266,8 @@ void CommandHandler::chatCommands(std::vector<std::string> &cmdTokens, Client &c
 			//_channelControl.setChannelTopic(cmdTokens[1], cmdTokens[2]);
 			break;
 		case MODE:
+			if (cmdTokens.size() > 1 && cmdTokens[1][0] != '&' && cmdTokens[1][0] != '#')
+				break;
 			caseMODE(client, cmdTokens);
 			break;
 		case PRIVMSG://* FOR ALL MESSAGES -> both channel or private goes through here!

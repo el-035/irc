@@ -322,3 +322,163 @@ std::vector<int> CommandHandler::fetchChannelMembers(std::string channelName){
 		}
 		return fds;
 }
+
+bool CommandHandler::validateModeToken(std::vector<std::string>& cmdTokens){
+	if (cmdTokens.size() < 2)
+		return false;
+	if (cmdTokens.size() > 2){
+		if (cmdTokens[2][0] != '+' && cmdTokens[2][0] != '-')
+			return false;
+		if (cmdTokens[2][1] != 'l' && cmdTokens[2][1] != 'k' && cmdTokens[2][1] != 'i' && cmdTokens[2][1] != 't' && cmdTokens[2][1] != 'o')
+			return false;
+		if (cmdTokens[2] == "+l"){
+			if (cmdTokens.size() < 4)
+				return false;
+			std::stringstream ss(cmdTokens[3]);
+			size_t lim;
+			ss >> lim;
+			if (ss.fail() || !ss.eof())
+    			return false;
+		} 
+		if (cmdTokens[2] == "+k" && cmdTokens.size() < 4)
+			return false;
+		if ((cmdTokens[2] == "+o" || cmdTokens[2] == "-o") && cmdTokens.size() < 4)
+			return false;
+	}
+	return true;
+}
+
+void	CommandHandler::sendModes(Client& client, std::string& chanName, Channel& curChan){
+	std::string modes;
+	std::string extra;
+	if (curChan.mode[INV])
+		modes += "i";
+	if (curChan.mode[TOP])
+		modes += "t";
+	if (curChan.mode[KEY]){
+		modes += "k";
+		extra += " " + curChan.key;
+	}
+	if (curChan.mode[LIM]){
+		std::stringstream ss;
+		ss << curChan.limit;
+		modes += "l";
+		extra += " " + ss.str();
+	}
+	if (!modes.empty())
+		modes = " +" + modes;
+	extra += "\r\n";
+	std::string str = ":ircserv 324 " + client.getNickname() + " " + chanName + modes + extra;
+	client.appendToWriteBuffer(str);
+}
+
+std::string CommandHandler::changeModes(std::vector<std::string>& cmdTokens, Channel& curChan){
+	std::string update;
+	char sign = cmdTokens[2][0];
+	char mode = cmdTokens[2][1];
+//	std::cout << "HERE\n";
+	switch (mode){
+	case 'i':
+		if (curChan.mode[INV] && sign == '-'){
+			curChan.mode[INV] = false;
+			update = "-i\r\n";
+		}
+		else if (!curChan.mode[INV] && sign == '+'){
+			curChan.mode[INV] = true;
+			update = "+i\r\n";
+		}
+		break;
+	case 't':
+		if (curChan.mode[TOP] && sign == '-'){
+			curChan.mode[TOP] = false;
+			update = "-t\r\n";
+		}
+		else if (!curChan.mode[TOP] && sign == '+'){
+			curChan.mode[TOP] = true;
+			update = "+t\r\n";
+		}
+		break;
+	case 'k':
+		if (curChan.mode[KEY] && sign == '-'){
+			curChan.mode[KEY] = false;
+			curChan.key.clear();
+			update = "-k\r\n";
+		}
+		else if (!curChan.mode[KEY] && sign == '+'){
+			curChan.mode[KEY] = true;
+			curChan.key = cmdTokens[3];
+			update = "+k " + curChan.key + "\r\n";
+		}
+		break;
+	case 'o': {
+		std::map<int, bool>::iterator it = curChan.clients.find(getClientFdFromNick(cmdTokens[3]));
+		if (it == curChan.clients.end())
+			break;
+		if (sign == '+' && it->second == false){
+			it->second = true;
+			update = "+o " + cmdTokens[3] + "\r\n";
+		}
+		else if (sign == '-' && it->second == true){
+			it->second = false;
+			update = "-o " + cmdTokens[3] + "\r\n";
+		}
+		break;
+	}
+	case 'l':
+		if (curChan.mode[LIM] && sign == '-'){
+			curChan.mode[LIM] = false;
+			curChan.limit = 200;
+			update = "-l\r\n";
+		}
+		else if (sign == '+'){
+			curChan.mode[LIM] = true;
+			std::stringstream ss(cmdTokens[3]);
+			ss >> curChan.limit;
+			update = "+l " + cmdTokens[3] + "\r\n";
+		}
+		break;
+	default:
+		break;
+	}
+	return update;
+}
+
+//MODE channel letter [key]
+void CommandHandler::caseMODE(Client& client, std::vector<std::string>& cmdTokens){
+	try{
+		if (!validateModeToken(cmdTokens))
+			throw(errMsg(ERR_NEEDMOREPARAMS, client.getNickname(), cmdTokens[0], MSG_NEEDMOREPARAMS , ""));
+
+		//check if channel exists
+		std::map<std::string, Channel>::iterator curChan = _channels.find(cmdTokens[1]);
+		if (curChan == _channels.end())
+			throw(errMsg(ERR_NOSUCHCHANNEL, client.getNickname(), cmdTokens[1], MSG_NOSUCHCHANNEL, ""));
+		
+		//check if client is part of channel
+		std::map<int, bool>::iterator curClien = curChan->second.clients.find(client.getFd());
+		if (curClien == curChan->second.clients.end())
+			throw(errMsg(ERR_NOTONCHANNEL, client.getNickname(), cmdTokens[1], MSG_NOTONCHANNEL, ""));
+
+		//if no modes, print them
+		if (cmdTokens.size() == 2)
+			return (sendModes(client, cmdTokens[1], curChan->second));
+	
+		//check if client is operator
+		if (curClien->second == false)
+			throw(errMsg(ERR_CHANOPRIVSNEEDED, client.getNickname(), cmdTokens[2], MSG_CHANOPRIVSNEEDED, ""));
+		
+		//save mode in struct
+		std::string update = changeModes(cmdTokens, curChan->second);
+		if (!update.empty()){
+			std::string msg = ":" + client.getNickname() + " MODE " + cmdTokens[1] + update;
+			//TO ALL CLIENTS
+			for (std::map<int, bool>::iterator it = curChan->second.clients.begin(); it != curChan->second.clients.end(); ++it){
+				std::map<int, Client>::iterator clie = _clients.find(it->first);
+				clie->second.appendToWriteBuffer(msg);
+			}
+		}		
+	}
+	catch(const std::string& msg){
+		client.appendToWriteBuffer(msg);
+	}
+}
