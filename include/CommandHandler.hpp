@@ -19,6 +19,7 @@ enum ClientCommand {
 	KICK,
 	INVITE,
 	TOPIC,
+    WHO,
 	MODE,
 	OPER,
 	UNKNOWN
@@ -70,12 +71,14 @@ class CommandHandler
 		void caseINVITE(Client &client, std::vector<std::string> &cmdTokens);
 		void caseTOPIC(Client &client, std::vector<std::string> &cmdTokens);
 		void caseJOIN(Client &client, std::vector<std::string> &cmdTokens);
-		bool channelSyntax(const std::string& name);
+		void caseWHO(Client &client, std::vector<std::string> &cmdTokens);	
+		
+        bool channelSyntax(const std::string& name);
 		int getClientFdFromNick(std::string& Nickname);
 		std::vector <int> fetchChannelMembers(std::string channelName);//* returns filled up vector list with all fd-s associated with a channel! if Channel doesnt exits, return list with only 1 member and its value is -1
 		bool validateModeToken(std::vector<std::string>& cmdTokens);
 		void	sendModes(Client& client, std::string& chanName, Channel& curChan);
-		std::string changeModes(std::vector<std::string>& cmdTokens, Channel& curChan);
+		std::string changeModes(Client& client, std::vector<std::string>& cmdTokens, Channel& curChan);
 		
 		
 	public:

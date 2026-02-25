@@ -7,6 +7,10 @@ OBJ = $(SRC:.cpp=.o)
 NAME = ircserv
 HEADERS = include/main.hpp include/Server.hpp include/Client.hpp include/CommandHandler.hpp 
 
+#for vagrind testing
+PORT = 2000
+PASS = 2
+
 all: $(NAME)
 
 $(NAME): $(OBJ)
@@ -23,4 +27,7 @@ fclean: clean
 
 re: fclean all
 
-.PHONY: all clean fclean re
+val: $(NAME)
+	valgrind --leak-check=full --show-leak-kinds=all  --track-origins=yes  --track-fds=yes ./$(NAME) $(PORT) $(PASS)
+
+.PHONY: all clean fclean re val

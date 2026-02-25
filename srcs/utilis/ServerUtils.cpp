@@ -53,7 +53,7 @@ ServerEnum Server::readClientsData(int i)
 {
     char buf[1024];
     int b = recv(_pollfds[i].fd, buf, sizeof(buf), 0);
-    std::cout << "total number of bytes read : " << b << std::endl;
+    //std::cout << "total number of bytes read : " << b << std::endl;
     for (int j = 0; j < b; j++)
     {
         if (buf[j] == '\r') std::cout << "\\r";

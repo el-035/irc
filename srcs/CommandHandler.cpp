@@ -245,19 +245,18 @@ void CommandHandler::chatCommands(std::vector<std::string> &cmdTokens, Client &c
 			break;
 		case JOIN:
 			caseJOIN(client, cmdTokens);
-//			_channelControl.channelJoin(cmdTokens[1], client.getFd());
 			break;
 		case KICK:
 			caseKICK(client, cmdTokens);
-			//_channelControl.ejectClientFromChannel(cmdTokens[1], client.getFd());
 			break;
 		case INVITE:
 			caseINVITE(client, cmdTokens);
-			//_channelControl.inviteClientToChannel(cmdTokens[1], client.getFd());
 			break;
 		case TOPIC:
 			caseTOPIC(client, cmdTokens);
-			//_channelControl.setChannelTopic(cmdTokens[1], cmdTokens[2]);
+			break;
+		case WHO:
+			caseWHO(client, cmdTokens);
 			break;
 		case MODE:
 			if (cmdTokens.size() > 1 && cmdTokens[1][0] != '&' && cmdTokens[1][0] != '#')
@@ -283,7 +282,7 @@ void CommandHandler::processNewData(Client &client)
 		std::vector<std::string> cmdTokens = extractCommand(client.getReadBuffer());
 		if (cmdTokens.empty()) continue;
 
-		std::cout << "CMD: " << cmdTokens[0] << std::endl;//* remove later, testing only
+		//std::cout << "CMD: " << cmdTokens[0] << std::endl;//* remove later, testing only
 
 		if (!client.getRegistered()) 
 			clientRegister(client, cmdTokens);

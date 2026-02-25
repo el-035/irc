@@ -11,6 +11,7 @@ int CommandHandler::cmdType(const std::string& cmd)
     if (cmd == "KICK") return KICK;
     if (cmd == "TOPIC") return TOPIC;
 	if (cmd == "MODE") return MODE;
+    if (cmd == "WHO") return WHO;
 
     if (cmd == "PRIVMSG") return PRIVMSG;
     if (cmd == "PING") return PING;
@@ -36,14 +37,14 @@ bool CommandHandler::commandComplete(const std::string& buffer)
 #include<iostream>
 std::vector<std::string> CommandHandler::extractCommand(std::string& buffer)
 {
-    std::cout << "DEBUG 1: Entering extractCommand. Buffer size: " << buffer.size() << std::endl;
+    //std::cout << "DEBUG 1: Entering extractCommand. Buffer size: " << buffer.size() << std::endl;
     std::vector<std::string> commandTokens;
     size_t pos = buffer.find('\n');
     
     if (pos == std::string::npos) return commandTokens;
 
     std::string line = buffer.substr(0, pos);
-    std::cout << "DEBUG 2: Line extracted: [" << line << "]" << std::endl;
+    //std::cout << "DEBUG 2: Line extracted: [" << line << "]" << std::endl;
 
     if (!line.empty() && line[line.size() - 1] == '\r')
         line.erase(line.size() - 1);
@@ -64,13 +65,13 @@ std::vector<std::string> CommandHandler::extractCommand(std::string& buffer)
         std::string token = line.substr(i, nextSpace - i);
         commandTokens.push_back(token);
         
-        std::cout << "DEBUG 3: Extracted token: [" << token << "]" << std::endl;
+   //     std::cout << "DEBUG 3: Extracted token: [" << token << "]" << std::endl;
 
         if (nextSpace == std::string::npos) break;
         i = nextSpace;
     }
 
-    std::cout << "DEBUG 4: Erasing from buffer..." << std::endl;
+ //   std::cout << "DEBUG 4: Erasing from buffer..." << std::endl;
     buffer.erase(0, pos + 1);
     return commandTokens;
 }
