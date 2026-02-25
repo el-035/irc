@@ -1,10 +1,14 @@
-//ADD header file!
-//ADD header file!
-//ADD header file!
-//ADD header file!
-//ADD header file!
-//ADD header file!
-
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Server.cpp                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/02/25 17:19:00 by dbogovic          #+#    #+#             */
+/*   Updated: 2026/02/25 19:22:03 by dbogovic         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "../include/Server.hpp"
 #include "../include/CommandHandler.hpp"
@@ -15,7 +19,6 @@
 #include <sys/signal.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <fcntl.h>
 #include <poll.h>
 #include <unistd.h>
 #include <vector>
@@ -24,7 +27,7 @@ volatile sig_atomic_t g_server_stop = 0;
 
 Server::Server(int port, const std::string& password) : _port(port), _password(password)
 {
-}   
+}
 
 void handle_signal (int sig)
 {
@@ -32,7 +35,7 @@ void handle_signal (int sig)
 	g_server_stop = 1;
 }
 
-void signalSetup(void)
+void Server::signalSetup(void)
 {
 	struct sigaction sa;
 	sa.sa_handler = handle_signal;
@@ -40,6 +43,18 @@ void signalSetup(void)
 	sa.sa_flags = 0;
 	if (sigaction(SIGINT, &sa, NULL) == -1)
 		return ;
+}
+
+void Server::closeAllFds(void)
+{
+	for (size_t i = 0; i < _pollfds.size(); ++i)
+	{
+		if (_pollfds[i].fd >= 0)
+		{
+			close(_pollfds[i].fd);
+			_pollfds[i].fd = -1;
+		}
+	}
 }
 
 void Server::ServerStart()
@@ -63,7 +78,7 @@ void Server::ServerStart()
 			}
 			if (newData(i) == ARRIVED)
 			{
-			
+
 				if (newDataIs(i) == NEW_CLIENT) {
 					AddNewClient();
 				} else if (newDataIs(i) == EXISTING_CLIENT)
@@ -74,11 +89,15 @@ void Server::ServerStart()
 						--i;
 						continue;
 					}
-					
+
 					cmdHandler.processNewData(_clients[_pollfds[i].fd]);
-	
+
 					if (_clients[_pollfds[i].fd].isAuthenticated() == false)
 					{
+						if (!isBuffEmpty(i))
+							_pollfds[i].events |= POLLOUT;
+						if (clientReadRdy(i) == READY)
+							writeToClient(_clients[_pollfds[i].fd]);
 						DisconnectClient(i);
 						--i;
 						continue;
@@ -91,9 +110,8 @@ void Server::ServerStart()
 			}
 		}
 	}
+	closeAllFds();
 }
-
-
 
 void Server::Initialize()
 {
@@ -113,12 +131,6 @@ void Server::Initialize()
 		throw(std::runtime_error("Error: setsockopt(): Creating server failed!"));
 	}
 
-	//*
-	if (fcntl(_server_fd, F_SETFL, O_NONBLOCK) == -1)//* change setting of fd file to Nonblocking
-	{
-		close(_server_fd);
-		throw(std::runtime_error("Error: fcntl(): Creating server failed!"));
-	}
 	//* main goal of following code is to give this fd reciever adress
 	sockaddr_in adress;//* create object "adress" of type sockaddr_in
 	adress.sin_family = AF_INET; //* rule 1 - use ipV4
@@ -150,5 +162,4 @@ void Server::Initialize()
 	_pollfds.push_back(server_pfd);
 	//! Rule: For almost all IRC server implementations, fds[0] is usually reserver for server listener
 	std::cout << "Server waiting on port: " << _port << std::endl;//* console log
-
 }
