@@ -1,5 +1,14 @@
-
-
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   CommandHandlerChannelControl.cpp                   :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/02/25 17:24:43 by dbogovic          #+#    #+#             */
+/*   Updated: 2026/02/25 19:03:37 by dbogovic         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "../include/Client.hpp"
 #include "../include/CommandHandler.hpp"
@@ -63,7 +72,7 @@ void CommandHandler::caseKICK(Client &client, std::vector<std::string> &cmdToken
 			reason = cmdTokens[3];
 			for (size_t i = 4; i < cmdTokens.size(); i++)
 				reason += " " + cmdTokens[i];
-			reason = " :" + reason;	
+			reason = " :" + reason;
 		}
 		std::string ejectMsg = ":" + client.getNickname() + "!" + client.getUsername() + "@localhost KICK " + cmdTokens[1] + " " + cmdTokens[2] + reason + "\r\n";
 		for (std::map<int, bool>::iterator it = curChan->second.clients.begin(); it != curChan->second.clients.end(); ++it){
@@ -140,20 +149,20 @@ void CommandHandler::caseTOPIC(Client &client, std::vector<std::string> &cmdToke
 		//check min 2 tokens
 		if (cmdTokens.size() < 2)
 			throw(errMsg(ERR_NEEDMOREPARAMS, client.getNickname(), cmdTokens[0], MSG_NEEDMOREPARAMS , ""));
-		
+
 		//check if channel exists
 		std::map<std::string, Channel>::iterator curChan = _channels.find(cmdTokens[1]);
 		if (curChan == _channels.end())
 			throw(errMsg(ERR_NOSUCHCHANNEL, client.getNickname(), cmdTokens[1], MSG_NOSUCHCHANNEL, ""));
-		
+
 		//check if client is part of channel
 		std::map<int, bool>::iterator curClien = curChan->second.clients.find(client.getFd());
 		if (curClien == curChan->second.clients.end())
 			throw(errMsg(ERR_NOTONCHANNEL, client.getNickname(), cmdTokens[1], MSG_NOTONCHANNEL, ""));
-		
+
 		// if 2 tokens -_>show topic
 		if (cmdTokens.size() == 2){
-			
+
 			if (!curChan->second.topic.empty()){
 				std::string reply = ":ircserv 332 " + client.getNickname() + " " + cmdTokens[1] + " :" + curChan->second.topic + "\r\n";
 				client.appendToWriteBuffer(reply);
@@ -166,7 +175,7 @@ void CommandHandler::caseTOPIC(Client &client, std::vector<std::string> &cmdToke
 		}
 
 		//if more check operator permission for changing topic
-		else if (cmdTokens.size() >= 3){	
+		else if (cmdTokens.size() >= 3){
 			if (curChan->second.mode[TOP] == true){
 				if (curClien->second == false)
 					throw(errMsg(ERR_CHANOPRIVSNEEDED, client.getNickname(), cmdTokens[1], MSG_CHANOPRIVSNEEDED, ""));
@@ -179,7 +188,7 @@ void CommandHandler::caseTOPIC(Client &client, std::vector<std::string> &cmdToke
 			topic += " " + cmdTokens[i];
 		curChan->second.topic = topic;
 		topic = " :" + topic + "\r\n";
-		
+
 		//notify all channel members
 		std::string topMsg = ":" + client.getNickname() + "!" + client.getUsername() + "@localhost TOPIC " + cmdTokens[1] + topic;
 		for (std::map<int, bool>::iterator it = curChan->second.clients.begin(); it != curChan->second.clients.end(); ++it){
@@ -209,7 +218,7 @@ void CommandHandler::caseJOIN(Client &client, std::vector<std::string> &cmdToken
 		//check params
 		if (cmdTokens.size() < 2)
 			throw(errMsg(ERR_NEEDMOREPARAMS, client.getNickname(), cmdTokens[0], MSG_NEEDMOREPARAMS , ""));
-		
+
 		//channel syntax rules
 		if (!channelSyntax(cmdTokens[1])) //to be tested still with nc
 			throw(errMsg(ERR_BADCHANMASK, client.getNickname(), cmdTokens[1], MSG_BADCHANMASK , ""));
@@ -223,8 +232,8 @@ void CommandHandler::caseJOIN(Client &client, std::vector<std::string> &cmdToken
 			chanCreated = true;
 			curChan = _channels.find(cmdTokens[1]);
 			curChan->second.name = cmdTokens[1];
-			curChan->second.topic = "";			
-			curChan->second.key = "";			
+			curChan->second.topic = "";
+			curChan->second.key = "";
 			curChan->second.limit = 200;
 			curChan->second.clients[client.getFd()] = true;
 			//return ;
@@ -258,11 +267,11 @@ void CommandHandler::caseJOIN(Client &client, std::vector<std::string> &cmdToken
 			}
 			if (join == false)
 				throw(errMsg(ERR_INVITEONLYCHAN, client.getNickname(), cmdTokens[1], MSG_INVITEONLYCHAN, ""));
-			
+
 			//remove from invited list
 			curChan->second.invited.erase(it);
 		}
-		
+
 		//user joins channel
 		if (!chanCreated)
 			curChan->second.clients[client.getFd()] = false;
@@ -275,7 +284,7 @@ void CommandHandler::caseJOIN(Client &client, std::vector<std::string> &cmdToken
 				c->second.appendToWriteBuffer(joined);
 		}
 
-		// print topic 
+		// print topic
 		if (!curChan->second.topic.empty()){
 			std::string topic = ":ircserv 332 " + client.getNickname() + " " + cmdTokens[1] + " :" + curChan->second.topic + "\r\n";
 			client.appendToWriteBuffer(topic);
@@ -339,7 +348,7 @@ bool CommandHandler::validateModeToken(std::vector<std::string>& cmdTokens){
 			ss >> lim;
 			if (ss.fail() || !ss.eof())
     			return false;
-		} 
+		}
 		if (cmdTokens[2] == "+k" && cmdTokens.size() < 4)
 			return false;
 		if ((cmdTokens[2] == "+o" || cmdTokens[2] == "-o") && cmdTokens.size() < 4)
@@ -376,7 +385,7 @@ std::string CommandHandler::changeModes(std::vector<std::string>& cmdTokens, Cha
 	std::string update;
 	char sign = cmdTokens[2][0];
 	char mode = cmdTokens[2][1];
-//	std::cout << "HERE\n";
+
 	switch (mode){
 	case 'i':
 		if (curChan.mode[INV] && sign == '-'){
@@ -453,7 +462,7 @@ void CommandHandler::caseMODE(Client& client, std::vector<std::string>& cmdToken
 		std::map<std::string, Channel>::iterator curChan = _channels.find(cmdTokens[1]);
 		if (curChan == _channels.end())
 			throw(errMsg(ERR_NOSUCHCHANNEL, client.getNickname(), cmdTokens[1], MSG_NOSUCHCHANNEL, ""));
-		
+
 		//check if client is part of channel
 		std::map<int, bool>::iterator curClien = curChan->second.clients.find(client.getFd());
 		if (curClien == curChan->second.clients.end())
@@ -462,11 +471,11 @@ void CommandHandler::caseMODE(Client& client, std::vector<std::string>& cmdToken
 		//if no modes, print them
 		if (cmdTokens.size() == 2)
 			return (sendModes(client, cmdTokens[1], curChan->second));
-	
+
 		//check if client is operator
 		if (curClien->second == false)
 			throw(errMsg(ERR_CHANOPRIVSNEEDED, client.getNickname(), cmdTokens[2], MSG_CHANOPRIVSNEEDED, ""));
-		
+
 		//save mode in struct
 		std::string update = changeModes(cmdTokens, curChan->second);
 		if (!update.empty()){
@@ -476,7 +485,7 @@ void CommandHandler::caseMODE(Client& client, std::vector<std::string>& cmdToken
 				std::map<int, Client>::iterator clie = _clients.find(it->first);
 				clie->second.appendToWriteBuffer(msg);
 			}
-		}		
+		}
 	}
 	catch(const std::string& msg){
 		client.appendToWriteBuffer(msg);
