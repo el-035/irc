@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   CommandHandler.hpp                                 :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/02/25 17:22:58 by dbogovic          #+#    #+#             */
+/*   Updated: 2026/02/25 19:09:42 by dbogovic         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef COMMANDHANDLER_HPP
 #define COMMANDHANDLER_HPP
 
@@ -22,6 +34,8 @@ enum ClientCommand {
     WHO,
 	MODE,
 	OPER,
+	WHOIS,
+	NOTICE,
 	UNKNOWN
 };
 
@@ -65,28 +79,31 @@ class CommandHandler
 		std::vector<std::string> extractCommand(std::string& buffer);
 		bool commandComplete(const std::string& buffer);
 		int cmdType(const std::string& cmd);
-		
-		void caseMODE(Client &client, std::vector<std::string> &cmdTokens);	
+
+		void caseMODE(Client &client, std::vector<std::string> &cmdTokens);
 		void caseKICK(Client &client, std::vector<std::string> &cmdTokens);
 		void caseINVITE(Client &client, std::vector<std::string> &cmdTokens);
 		void caseTOPIC(Client &client, std::vector<std::string> &cmdTokens);
 		void caseJOIN(Client &client, std::vector<std::string> &cmdTokens);
 		void caseWHO(Client &client, std::vector<std::string> &cmdTokens);	
-		
-        bool channelSyntax(const std::string& name);
+		void caseWHOIS(Client &requester, std::vector<std::string> &cmdTokens);
+		void caseNOTICE(Client &sender, std::vector<std::string> &cmdTokens);
+		bool channelSyntax(const std::string& name);
+
 		int getClientFdFromNick(std::string& Nickname);
 		std::vector <int> fetchChannelMembers(std::string channelName);//* returns filled up vector list with all fd-s associated with a channel! if Channel doesnt exits, return list with only 1 member and its value is -1
 		bool validateModeToken(std::vector<std::string>& cmdTokens);
 		void	sendModes(Client& client, std::string& chanName, Channel& curChan);
 		std::string changeModes(Client& client, std::vector<std::string>& cmdTokens, Channel& curChan);
 		
-		
 	public:
-		CommandHandler(std::map<int, Client> &clients, const std::string& password) : _clients(clients), _password(password)/*,  _channelControl() */ {}
+		CommandHandler(std::map<int, Client> &clients, const std::string& password);
 		void processNewData(Client &client);
 		int findUsingName(std::string name);
 
-
+		~CommandHandler();
+		CommandHandler& operator=(const CommandHandler& other);
+		CommandHandler(const CommandHandler& other);
 };
 
 #define ERR_NEEDMOREPARAMS		461
