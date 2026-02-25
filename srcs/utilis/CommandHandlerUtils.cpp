@@ -24,6 +24,7 @@ int CommandHandler::cmdType(const std::string& cmd)
 	if (cmd == "KICK") return KICK;
 	if (cmd == "TOPIC") return TOPIC;
 	if (cmd == "MODE") return MODE;
+  if (cmd == "WHO") return WHO;
 	if (cmd == "WHOIS") return WHOIS;
 	if (cmd == "PRIVMSG") return PRIVMSG;
 	if (cmd == "PING") return PING;

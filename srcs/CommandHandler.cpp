@@ -340,6 +340,9 @@ void CommandHandler::chatCommands(std::vector<std::string> &cmdTokens, Client &c
 		case TOPIC:
 			caseTOPIC(client, cmdTokens);
 			break;
+		case WHO:
+			caseWHO(client, cmdTokens);
+			break;
 		case MODE:
 			if (cmdTokens.size() > 1 && cmdTokens[1][0] != '&' && cmdTokens[1][0] != '#')
 				break;
@@ -364,7 +367,7 @@ void CommandHandler::processNewData(Client &client)
 		std::vector<std::string> cmdTokens = extractCommand(client.getReadBuffer());
 		if (cmdTokens.empty()) continue;
 
-		std::cout << "CMD: " << cmdTokens[0] << std::endl;//* remove later, testing only
+		//std::cout << "CMD: " << cmdTokens[0] << std::endl;//* remove later, testing only
 
 		if (!client.getRegistered())
 			clientRegister(client, cmdTokens);

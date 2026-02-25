@@ -277,7 +277,7 @@ void CommandHandler::caseJOIN(Client &client, std::vector<std::string> &cmdToken
 			curChan->second.clients[client.getFd()] = false;
 
 		//confirmation of joining EVERYONE ON CHANNEL
-		std::string joined = ":" + client.getNickname() + "!" + client.getUsername() + "@localhost JOIN :" + cmdTokens[1] + "\r\n";
+		std::string joined = ":" + client.getNickname() + "!" + client.getUsername() + "@localhost JOIN " + cmdTokens[1] + "\r\n";
 		for (std::map<int, bool>::iterator it = curChan->second.clients.begin(); it != curChan->second.clients.end(); ++it){
 			std::map<int, Client>::iterator c = _clients.find(it->first);
 			if (c != _clients.end())
@@ -310,7 +310,7 @@ void CommandHandler::caseJOIN(Client &client, std::vector<std::string> &cmdToken
 		}
 		std::string s = ":ircserv 353 " + client.getNickname() + " = " + cmdTokens[1] + " :" + namesList + "\r\n";
 		client.appendToWriteBuffer(s);
-		s = ":ircserv 366 " + client.getNickname() + " " + cmdTokens[1] + " :End of /NAMES list\r\n";
+		s = ":ircserv 366 " + client.getNickname() + " " + cmdTokens[1] + " :End of /NAMES list.\r\n";
 		client.appendToWriteBuffer(s);
 	}
 	catch(const std::string& msg){
@@ -381,7 +381,7 @@ void	CommandHandler::sendModes(Client& client, std::string& chanName, Channel& c
 	client.appendToWriteBuffer(str);
 }
 
-std::string CommandHandler::changeModes(std::vector<std::string>& cmdTokens, Channel& curChan){
+std::string CommandHandler::changeModes(Client& client, std::vector<std::string>& cmdTokens, Channel& curChan){
 	std::string update;
 	char sign = cmdTokens[2][0];
 	char mode = cmdTokens[2][1];
@@ -421,8 +421,10 @@ std::string CommandHandler::changeModes(std::vector<std::string>& cmdTokens, Cha
 		break;
 	case 'o': {
 		std::map<int, bool>::iterator it = curChan.clients.find(getClientFdFromNick(cmdTokens[3]));
-		if (it == curChan.clients.end())
+		if (it == curChan.clients.end()){
+			throw(errMsg(ERR_NOSUCHNICK, client.getNickname(), cmdTokens[3], MSG_NOSUCHNICK, ""));
 			break;
+		}
 		if (sign == '+' && it->second == false){
 			it->second = true;
 			update = "+o " + cmdTokens[3] + "\r\n";
@@ -474,10 +476,10 @@ void CommandHandler::caseMODE(Client& client, std::vector<std::string>& cmdToken
 
 		//check if client is operator
 		if (curClien->second == false)
-			throw(errMsg(ERR_CHANOPRIVSNEEDED, client.getNickname(), cmdTokens[2], MSG_CHANOPRIVSNEEDED, ""));
+			throw(errMsg(ERR_CHANOPRIVSNEEDED, client.getNickname(), cmdTokens[1], MSG_CHANOPRIVSNEEDED, ""));
 
 		//save mode in struct
-		std::string update = changeModes(cmdTokens, curChan->second);
+		std::string update = changeModes(client, cmdTokens, curChan->second);
 		if (!update.empty()){
 			std::string msg = ":" + client.getNickname() + " MODE " + cmdTokens[1] + update;
 			//TO ALL CLIENTS
@@ -486,6 +488,43 @@ void CommandHandler::caseMODE(Client& client, std::vector<std::string>& cmdToken
 				clie->second.appendToWriteBuffer(msg);
 			}
 		}
+	}
+	catch(const std::string& msg){
+		client.appendToWriteBuffer(msg);
+	}
+}
+
+//WHO channel
+void CommandHandler::caseWHO(Client &client, std::vector<std::string> &cmdTokens){
+	//check tokens
+	try{
+		if (cmdTokens.size() < 2)
+			throw(errMsg(ERR_NEEDMOREPARAMS, client.getNickname(), cmdTokens[0], MSG_NEEDMOREPARAMS , ""));
+	
+		//Check if channel exists
+		std::map<std::string, Channel>::iterator curChan = _channels.find(cmdTokens[1]);
+		if (curChan == _channels.end())
+			throw(errMsg(ERR_NOSUCHCHANNEL, client.getNickname(), cmdTokens[1], MSG_NOSUCHCHANNEL, ""));
+		
+		//send reply
+		for (std::map<int, bool>::iterator it = curChan->second.clients.begin(); it != curChan->second.clients.end(); ++it){
+			int fd = it->first;
+
+			std::map<int, Client>::iterator user = _clients.find(fd);
+			if (user == _clients.end())
+    	        continue;
+
+			std::string flag = " H";
+			if (it->second == true)
+				flag += "@";
+
+		
+			std::string msg = ":ircserv 352 " + client.getNickname() + " " + cmdTokens[1] + " " + user->second.getUsername() + " localhost ircserv " + user->second.getNickname() + flag + " :0 " + user->second.getRealname() + "\r\n";
+			client.appendToWriteBuffer(msg);
+		}
+		//send end of who 
+		std::string end = ":ircserv 315 " + client.getNickname() + " " + cmdTokens[1] + " :End of /WHO list.\r\n";
+		client.appendToWriteBuffer(end);
 	}
 	catch(const std::string& msg){
 		client.appendToWriteBuffer(msg);
