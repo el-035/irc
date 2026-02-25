@@ -224,12 +224,6 @@ void  CommandHandler::clientRegister(Client &client, std::vector<std::string> &c
 			return;
 	}
 }
-/* void caseMODE(Client& client, std::vector<std::string>& cmdTokens)
-{
-	(void)client;
-	(void)cmdTokens;
-	std::cout << "ignoring mode for now!" << std::endl;
-} */
 
 void CommandHandler::chatCommands(std::vector<std::string> &cmdTokens, Client &client)
 {
