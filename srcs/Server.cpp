@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/25 17:19:00 by dbogovic          #+#    #+#             */
-/*   Updated: 2026/02/27 15:40:49 by dbogovic         ###   ########.fr       */
+/*   Updated: 2026/02/27 18:44:25 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,6 +83,7 @@ void Server::ServerStart()
 			Client &cli = _clients[fd];
 			if (errorOccured(i))
 			{
+				cmdHandler.updateGroup(fd);
 				DisconnectClient(fd);
 				--i;
 				continue;
@@ -91,6 +92,7 @@ void Server::ServerStart()
 			{
 				if (writeToClient(cli) == CONNECTION_CLOSED)
 				{
+					cmdHandler.updateGroup(fd);
 					--i;
 					continue;
 				}
@@ -105,6 +107,7 @@ void Server::ServerStart()
 				{
 					if (readClientsData(i) == CONNECTION_CLOSED)
 					{
+						cmdHandler.updateGroup(fd);
 						--i;
 						continue;
 					}
