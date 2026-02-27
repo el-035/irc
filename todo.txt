@@ -12,3 +12,7 @@ Just like in the subject, using nc, try to send partial commands. Check that the
 Unexpectedly kill a nc with just half of a command sent. Check again that the server is not in an odd state or blocked.
 
 try bottleneck terminal
+
+[#culo] /mode #culo +k  --> what should happen?
+
+what happens if limit set to less than current members
