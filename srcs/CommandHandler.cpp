@@ -224,7 +224,7 @@ void CommandHandler::casePING(Client &client, std::vector<std::string> &cmdToken
 	if (cmdTokens.size() > 1)
 	{
 		std::string token = cmdTokens[1];
-		std::string pong = "PONG " + token + "\r\n";
+		std::string pong = ":ircserv PONG ircserv :" + token + "\r\n";	//i changed here but made no difference i guess
 		client.appendToWriteBuffer(pong);
 	}
 }
@@ -315,8 +315,10 @@ void CommandHandler::chatCommands(std::vector<std::string> &cmdTokens, Client &c
 			break;
 		case WHOIS:
 			caseWHOIS(client, cmdTokens);
+			break;
 		case NOTICE:
 			caseNOTICE(client, cmdTokens);
+			break;
 		case NICK:
 			caseNICK(client, cmdTokens);
 			break;
@@ -344,8 +346,9 @@ void CommandHandler::chatCommands(std::vector<std::string> &cmdTokens, Client &c
 			caseWHO(client, cmdTokens);
 			break;
 		case MODE:
-			if (cmdTokens.size() > 1 && cmdTokens[1][0] != '&' && cmdTokens[1][0] != '#')
+			if (cmdTokens.size() > 1 && cmdTokens[1][0] != '&' && cmdTokens[1][0] != '#'){
 				break;
+			}
 			caseMODE(client, cmdTokens);
 			break;
 		case PRIVMSG://* FOR ALL MESSAGES -> both channel or private goes through here!
