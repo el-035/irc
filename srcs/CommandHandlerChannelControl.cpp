@@ -6,7 +6,7 @@
 /*   By: efittant <efittant@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/25 17:24:43 by dbogovic          #+#    #+#             */
-/*   Updated: 2026/02/27 15:52:29 by efittant         ###   ########.fr       */
+/*   Updated: 2026/02/27 17:51:53 by efittant         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,6 +66,10 @@ void CommandHandler::caseKICK(Client &client, std::vector<std::string> &cmdToken
 			throw(errMsg(ERR_USERNOTINCHANNEL, client.getNickname(), cmdTokens[2], MSG_USERNOTINCHANNEL, extra));
 		}
 
+		//check if client is user
+		if (userFd == client.getFd())
+			throw(errMsg(ERR_CHANOPRIVSNEEDED, client.getNickname(), cmdTokens[1], " :Cannot kick yourself out\r\n", ""));
+			
 		//send msg to all clients
 		std::string reason;
 		if (cmdTokens.size() > 3){
@@ -236,7 +240,6 @@ void CommandHandler::caseJOIN(Client &client, std::vector<std::string> &cmdToken
 			curChan->second.key = "";
 			curChan->second.limit = 200;
 			curChan->second.clients[client.getFd()] = true;
-			//return ;
 		}
 
 		//check if client is already part of channel

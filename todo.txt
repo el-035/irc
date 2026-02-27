@@ -18,7 +18,7 @@ Stop a client (^-Z) connected on a channel. Then flood the channel using another
 
 Verify that private messages (PRIVMSG) are fully functional with different parameters.
 
-no topic is on status page when joijn channel
+~~no topic is on status page when joijn channel
 
 
 
@@ -28,8 +28,3 @@ Unknown command from client 5: WHO
 MODE #ko b\r\n
 PING localhost\r\n
 Sent PONG to client 5
-
-
-//TODO
-
-cannot kick myself out
