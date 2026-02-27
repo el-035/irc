@@ -18,11 +18,17 @@ Stop a client (^-Z) connected on a channel. Then flood the channel using another
 
 Verify that private messages (PRIVMSG) are fully functional with different parameters.
 
-//~done: no topic is on status page when joijn channel
+no topic is on status page when joijn channel
 
+WHO command?
 
-//TODO
+should a channel be deleted if there is nobody on it? - probably
 
-nickname changed everyone in the group is notifyed
+INVITE ji #ko\r\n
+WHO #ko\r\n
+Unknown command from client 5: WHO
+MODE #ko b\r\n
+PING localhost\r\n
+Sent PONG to client 5
 
-cannot kick myself out
+maybe we broadcast to channel if someone changes their nick (if not implemented already)

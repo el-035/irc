@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/25 17:19:00 by dbogovic          #+#    #+#             */
-/*   Updated: 2026/02/25 19:22:03 by dbogovic         ###   ########.fr       */
+/*   Updated: 2026/02/27 15:40:49 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,8 @@
 #include <poll.h>
 #include <unistd.h>
 #include <vector>
+#include <cerrno>
+//#include <fcntl.h>
 
 volatile sig_atomic_t g_server_stop = 0;
 
@@ -42,7 +44,7 @@ void Server::signalSetup(void)
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = 0;
 	if (sigaction(SIGINT, &sa, NULL) == -1)
-		return ;
+		throw(std::runtime_error("Error: sigaction() failure. Stopping!"));
 }
 
 void Server::closeAllFds(void)
@@ -59,54 +61,56 @@ void Server::closeAllFds(void)
 
 void Server::ServerStart()
 {
-	signalSetup();// ! handle possibilty of sigaction failure!
+	signalSetup();
 	CommandHandler cmdHandler(_clients, _password);
+
 
 	while (g_server_stop == 0)
 	{
 		updatePollEvents();
-		if (poll(&_pollfds[0], _pollfds.size(), -1) == -1) break;
+		if (poll(&_pollfds[0], _pollfds.size(), -1) == -1)
+		{
+			if (g_server_stop == 1)
+			break;
+			if (errno == EINTR)
+				continue;
+			throw(std::runtime_error("Error: poll() failed!"));
+		}
 
 		for (size_t i = 0; i < _pollfds.size(); ++i)
 		{
-			if (currentClienthasData(i) == false) continue;
+			int fd = _pollfds[i].fd;
+			Client &cli = _clients[fd];
 			if (errorOccured(i))
 			{
-				DisconnectClient(i);
+				DisconnectClient(fd);
 				--i;
 				continue;
 			}
-			if (newData(i) == ARRIVED)
+			if (_pollfds[i].revents & POLLOUT)
 			{
-
-				if (newDataIs(i) == NEW_CLIENT) {
-					AddNewClient();
-				} else if (newDataIs(i) == EXISTING_CLIENT)
+				if (writeToClient(cli) == CONNECTION_CLOSED)
 				{
-					if (readClientsData(i) == EMPTY_READ)
-					{
-						DisconnectClient(i);
-						--i;
-						continue;
-					}
-
-					cmdHandler.processNewData(_clients[_pollfds[i].fd]);
-
-					if (_clients[_pollfds[i].fd].isAuthenticated() == false)
-					{
-						if (!isBuffEmpty(i))
-							_pollfds[i].events |= POLLOUT;
-						if (clientReadRdy(i) == READY)
-							writeToClient(_clients[_pollfds[i].fd]);
-						DisconnectClient(i);
-						--i;
-						continue;
-					}
+					--i;
+					continue;
 				}
 			}
-			if (clientReadRdy(i) == READY)
+			if (_pollfds.size() <= i || _pollfds[i].fd != fd) { --i; continue; }
+
+			if (_pollfds[i].revents & POLLIN)
 			{
-				writeToClient(_clients[_pollfds[i].fd]);
+				if (fd == _server_fd)
+					AddNewClient();
+				else
+				{
+					if (readClientsData(i) == CONNECTION_CLOSED)
+					{
+						--i;
+						continue;
+					}
+					if (_pollfds.size() > i && _pollfds[i].fd == fd)
+						cmdHandler.processNewData(cli);
+				}
 			}
 		}
 	}
@@ -130,7 +134,11 @@ void Server::Initialize()
 		close(_server_fd);
 		throw(std::runtime_error("Error: setsockopt(): Creating server failed!"));
 	}
-
+	/*fcntl(_server_fd, F_SETFL, O_NONBLOCK);
+	{
+		close(_server_fd);
+		throw(std::runtime_error("Error: fcntl(): Could not set non-blocking mode"));
+	}*/
 	//* main goal of following code is to give this fd reciever adress
 	sockaddr_in adress;//* create object "adress" of type sockaddr_in
 	adress.sin_family = AF_INET; //* rule 1 - use ipV4

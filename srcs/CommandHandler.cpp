@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandHandler.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: efittant <efittant@student.42.fr>          +#+  +:+       +#+        */
+/*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/25 17:24:38 by dbogovic          #+#    #+#             */
-/*   Updated: 2026/02/27 16:00:17 by efittant         ###   ########.fr       */
+/*   Updated: 2026/02/27 15:50:26 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,90 +21,6 @@
 #include <string>
 #include <unistd.h>
 
-void CommandHandler::sendWelcome(Client &client)
-{
-	std::string nick = client.getNickname();
-	std::string source = "localhost"; // Or your server name
-
-	// RPL_WELCOME (001)
-	client.appendToWriteBuffer(":" + source + " 001 " + nick + " :Welcome to the IRC Network " + nick + "\r\n");
-
-	// RPL_YOURHOST (002)
-	client.appendToWriteBuffer(":" + source + " 002 " + nick + " :Your host is " + source + ", running version 1.0\r\n");
-
-	// RPL_CREATED (003)
-	client.appendToWriteBuffer(":" + source + " 003 " + nick + " :This server was created now\r\n");
-
-	// RPL_MYINFO (004)
-	client.appendToWriteBuffer(":" + source + " 004 " + nick + " " + source + " 1.0 io io\r\n");
-}
-
-void CommandHandler::caseCAP(Client &client, std::vector<std::string> &cmdTokens)
-{
-	if (cmdTokens.size() > 1)
-	{
-		if (cmdTokens[1] == "LS")
-		{
-			client.appendToWriteBuffer("CAP * LS :multi-prefix\r\n");
-		}
-		else if (cmdTokens[1] == "REQ")
-		{
-			// Irssi is asking for 'multi-prefix'
-			// We must respond with: CAP * ACK :capability
-			std::string feature = (cmdTokens.size() > 2) ? cmdTokens[2] : "";
-			client.appendToWriteBuffer("CAP * ACK :" + feature + "\r\n");
-			std::cout << "Acknowledged CAP REQ: " << feature << std::endl;
-		}
-		else if (cmdTokens[1] == "END")
-		{
-			std::cout << "CAP negotiation finished." << std::endl;
-			// Now Irssi will automatically send NICK and USER
-		}
-	}
-}
-
-void CommandHandler::caseNICK(Client &client, std::vector<std::string> &cmdTokens)
-{
-	if (cmdTokens.size() < 2) return;
-
-	std::string newNick = cmdTokens[1];
-	std::string oldNick = client.getNickname(); // Save current nick BEFORE changing
-
-	// 1. Check for collisions
-	int existingFd = findUsingName(newNick);
-	if (existingFd != -1 && existingFd != client.getFd())
-	{
-		client.appendToWriteBuffer("433 * " + newNick + " :Nickname is already in use\r\n");
-		return;
-	}
-
-	// 2. Perform the change
-	client.setNickname(newNick);
-
-	// 3. Logic Gate
-	if (!client.getRegistered())
-	{
-		// Still in registration phase
-		if (!client.getUsername().empty() && (client.isAuthenticated() || _password.empty()))
-		{
-			client.setRegistered(true);
-			std::cout << "REGISTRATION COMPLETE!" << std::endl;
-			sendWelcome(client);
-		}
-	}
-	else
-	{
-		// IMPORTANT: The prefix MUST be the OLD nickname
-		// Format: :OldNick!User@Host NICK :NewNick
-		std::string msg = ":" + oldNick + "!" + client.getUsername() + "@localhost NICK :" + newNick + "\r\n";
-
-		// You must send this to the client THEMSELVES so their UI updates
-		client.appendToWriteBuffer(msg);
-
-		// In the future, you will also broadcast this msg to all channels they are in
-		std::cout << "Nick changed: " << oldNick << " -> " << newNick << std::endl;
-	}
-}
 
 void CommandHandler::caseNOTICE(Client &sender, std::vector<std::string> &cmdTokens)
 {
@@ -140,46 +56,6 @@ void CommandHandler::caseNOTICE(Client &sender, std::vector<std::string> &cmdTok
 	}
 }
 
-void CommandHandler::caseUSER(Client &client, std::vector<std::string> &cmdTokens)
-{
-	// USER command structure: USER <username> <mode> <unused> :<realname>
-	if (cmdTokens.size() < 5) return;
-
-	std::string username = cmdTokens[1];
-	std::string realname = cmdTokens[4];
-
-	client.setUsername(username);
-	client.setRealname(realname);
-
-	// CHECK FOR COMPLETION:
-	// If we have a Nickname, a Username, and (optionally) a Password -> Register
-	if (!client.getNickname().empty() && !client.getUsername().empty())
-	{
-		if (client.isAuthenticated() || _password.empty())
-		{
-			client.setRegistered(true); // You need a flag in your client
-			std::cout << "REGISTRATION COMPLETE!" << std::endl;
-
-			sendWelcome(client);
-		}
-	}
-}
-
-void CommandHandler::casePASS(Client &client, std::vector<std::string> &cmdTokens)
-{
-	std::string pass = cmdTokens[1];
-	if (pass != _password)
-	{
-		client.setAuthenticated(false);
-		std::string msg = ":ft_irc 464 * :Password incorrect\r\n";
-		client.appendToWriteBuffer(msg);
-		return;
-	} else
-	{
-		client.setAuthenticated(true);
-	}
-}
-
 bool isChannel(const std::string& target)
 {
 	if (target.empty())
@@ -201,18 +77,19 @@ void CommandHandler::casePRIVMSG(Client &client, std::vector<std::string> &cmdTo
 	std::vector<int> fds;
 
 	if (isChannel(targetName))
-		fds = fetchChannelMembers(targetName);
+		fds = fetchChannelMembers(targetName, client.getFd());
 	else
 		fds.push_back(findUsingName(targetName));
 
-	if (fds.empty() || fds[0] == -1)
+	if (!fds.empty() && fds[0] == -1)
 	{
-		std::cout << "Cannot find user!!!\n\n" << std::endl;
 		client.appendToWriteBuffer(":localhost 401 " + client.getNickname() + " " + targetName + " :No such nick/channel\r\n");
 		return;
 	}
 	for (std::vector<int>::iterator it = fds.begin(); it != fds.end(); ++it)
 	{
+		if (*it == -1)
+			continue;
 		std::string relay = ":" + client.getNickname() + "!" + client.getUsername()
 							+ "@localhost PRIVMSG " + targetName + " :" + content + "\r\n";
 		_clients[*it].appendToWriteBuffer(relay);
@@ -285,31 +162,13 @@ void CommandHandler::caseUNKNOWN(Client &client, std::vector<std::string> &cmdTo
 	client.appendToWriteBuffer("ERROR :Unknown command\r\n");
 }
 
-void  CommandHandler::clientRegister(Client &client, std::vector<std::string> &cmdTokens)
+void CommandHandler::runCommands(std::vector<std::string> &cmdTokens, Client &client)
 {
 	switch (cmdType(cmdTokens[0]))
 	{
 		case CAP:
 			caseCAP(client, cmdTokens);
 			break;
-		case NICK:
-			caseNICK(client, cmdTokens);
-			break;
-		case USER:
-			caseUSER(client, cmdTokens);
-			break;
-		case PASS:
-			casePASS(client, cmdTokens);
-			break;
-		default:
-			return;
-	}
-}
-
-void CommandHandler::chatCommands(std::vector<std::string> &cmdTokens, Client &client)
-{
-	switch (cmdType(cmdTokens[0]))
-	{
 		case PING:
 			casePING(client, cmdTokens);
 			break;
@@ -326,7 +185,8 @@ void CommandHandler::chatCommands(std::vector<std::string> &cmdTokens, Client &c
 			caseUSER(client, cmdTokens);
 			break;
 		case PASS:
-			return;
+			casePASS(client, cmdTokens);
+			break;
 		case OPER:
 			// Not implemented yet
 			break;
@@ -346,16 +206,12 @@ void CommandHandler::chatCommands(std::vector<std::string> &cmdTokens, Client &c
 			caseWHO(client, cmdTokens);
 			break;
 		case MODE:
-			if (cmdTokens.size() > 1 && cmdTokens[1][0] != '&' && cmdTokens[1][0] != '#'){
+			if (cmdTokens.size() > 1 && cmdTokens[1][0] != '&' && cmdTokens[1][0] != '#')
 				break;
-			}
 			caseMODE(client, cmdTokens);
 			break;
-		case PRIVMSG://* FOR ALL MESSAGES -> both channel or private goes through here!
+		case PRIVMSG:
 			casePRIVMSG(client, cmdTokens);
-			break;
-		case PART:
-			casePART(client, cmdTokens);
 			break;
 		case UNKNOWN:
 			caseUNKNOWN(client, cmdTokens);
@@ -368,17 +224,32 @@ void CommandHandler::chatCommands(std::vector<std::string> &cmdTokens, Client &c
 
 void CommandHandler::processNewData(Client &client)
 {
+	std::vector<std::string> cmdTokens;
 	while (commandComplete(client.getReadBuffer()))
 	{
-		std::vector<std::string> cmdTokens = extractCommand(client.getReadBuffer());
+		cmdTokens = extractCommand(client.getReadBuffer());
 		if (cmdTokens.empty()) continue;
 
-		//std::cout << "CMD: " << cmdTokens[0] << std::endl;//* remove later, testing only
-
-		if (!client.getRegistered())
-			clientRegister(client, cmdTokens);
+		if (client.getState() == CONNECTED)
+		{
+			if (cmdTokens[0] != "PASS" && cmdTokens[0] != "USER" &&
+				cmdTokens[0] != "NICK" && cmdTokens[0] != "CAP" && cmdTokens[0] != "LS")
+				{
+					client.changeState(DISCONNECTING);
+				}
+			else
+				runCommands(cmdTokens, client);
+		}
 		else
-			chatCommands(cmdTokens, client);
+			runCommands(cmdTokens, client);
+	}
+	if (client.getState() != AUTHENTICATED && client.getState() != REGISTERED && cmdTokens[0] != "CAP")
+	{
+		std::cout << "2" << std::endl;
+		client.changeState(DISCONNECTING);
+		client.clearWriteBuffer();
+		std::string msg = ":ft_irc 464 * :Password incorrect\r\n";
+		client.appendToWriteBuffer(msg);
 	}
 }
 

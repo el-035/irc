@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandHandlerUtils.cpp                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: efittant <efittant@student.42.fr>          +#+  +:+       +#+        */
+/*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/25 17:24:15 by dbogovic          #+#    #+#             */
-/*   Updated: 2026/02/27 15:24:52 by efittant         ###   ########.fr       */
+/*   Updated: 2026/02/27 15:36:51 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,13 +24,11 @@ int CommandHandler::cmdType(const std::string& cmd)
 	if (cmd == "KICK") return KICK;
 	if (cmd == "TOPIC") return TOPIC;
 	if (cmd == "MODE") return MODE;
-	if (cmd == "WHO") return WHO;
+  if (cmd == "WHO") return WHO;
 	if (cmd == "WHOIS") return WHOIS;
 	if (cmd == "PRIVMSG") return PRIVMSG;
 	if (cmd == "PING") return PING;
 	if (cmd == "NOTICE") return NOTICE;
-	if (cmd == "PART") return PART;
-	
 	return UNKNOWN;
 }
 
@@ -78,8 +76,8 @@ std::vector<std::string> CommandHandler::extractCommand(std::string& buffer)
 		}
 
 		size_t nextSpace = line.find(' ', i);
-        // CRASH WATCH: Check if this substr calculation is valid
-		std::string token = line.substr(i, nextSpace - i);
+		size_t len = (nextSpace == std::string::npos) ? std::string::npos : (nextSpace - i);
+		std::string token = line.substr(i, len);
 		commandTokens.push_back(token);
 
 		std::cout << "SERVER 3: Extracted token: [" << token << "]" << std::endl;
