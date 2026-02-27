@@ -6,7 +6,7 @@
 /*   By: efittant <efittant@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/25 17:19:21 by dbogovic          #+#    #+#             */
-/*   Updated: 2026/02/27 18:48:53 by efittant         ###   ########.fr       */
+/*   Updated: 2026/02/27 18:41:24 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -194,4 +194,3 @@ bool Server::errorOccured(int i)
 		return true;
 	return false;
 }
-

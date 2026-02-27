@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandHandler.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: efittant <efittant@student.42.fr>          +#+  +:+       +#+        */
+/*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/25 17:24:38 by dbogovic          #+#    #+#             */
-/*   Updated: 2026/02/27 16:35:04 by efittant         ###   ########.fr       */
+/*   Updated: 2026/02/27 18:15:06 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -232,11 +232,16 @@ void CommandHandler::processNewData(Client &client)
 	{
 		cmdTokens = extractCommand(client.getReadBuffer());
 		if (cmdTokens.empty()) continue;
+		if (cmdTokens[0] == "2")
+		{
+			std::string msg = ":server 417 " + client.getNickname() + " :Input line too long\r\n";
+			client.appendToWriteBuffer(msg);
+		}
 
 		if (client.getState() == CONNECTED)
 		{
 			if (cmdTokens[0] != "PASS" && cmdTokens[0] != "USER" &&
-				cmdTokens[0] != "NICK" && cmdTokens[0] != "CAP" && cmdTokens[0] != "LS")
+				cmdTokens[0] != "NICK" && cmdTokens[0] != "CAP")
 				{
 					client.changeState(DISCONNECTING);
 				}
