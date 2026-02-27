@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandHandler.hpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
+/*   By: efittant <efittant@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/25 17:22:58 by dbogovic          #+#    #+#             */
-/*   Updated: 2026/02/25 19:09:42 by dbogovic         ###   ########.fr       */
+/*   Updated: 2026/02/27 15:43:36 by efittant         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@ enum ClientCommand {
 	OPER,
 	WHOIS,
 	NOTICE,
+	PART,
 	UNKNOWN
 };
 
@@ -48,6 +49,7 @@ enum ChannelModes {
 
 struct Channel
 {
+	public:
 	std::string 					name; //useless
 	std::string 					topic;
 	std::map<ChannelModes, bool> 	mode;
@@ -55,6 +57,7 @@ struct Channel
 	size_t							limit;
 	std::string 					key;
 	std::map<int, bool> 			clients; //int fd and bool isOperator
+	
 };
 
 class CommandHandler
@@ -86,8 +89,11 @@ class CommandHandler
 		void caseTOPIC(Client &client, std::vector<std::string> &cmdTokens);
 		void caseJOIN(Client &client, std::vector<std::string> &cmdTokens);
 		void caseWHO(Client &client, std::vector<std::string> &cmdTokens);	
+		void casePART(Client &client, std::vector<std::string> &cmdTokens);	
 		void caseWHOIS(Client &requester, std::vector<std::string> &cmdTokens);
 		void caseNOTICE(Client &sender, std::vector<std::string> &cmdTokens);
+		
+		void deleteEmptyChannel(std::string channelName);
 		bool channelSyntax(const std::string& name);
 
 		int getClientFdFromNick(std::string& Nickname);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandHandler.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
+/*   By: efittant <efittant@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/25 17:24:38 by dbogovic          #+#    #+#             */
-/*   Updated: 2026/02/25 19:10:05 by dbogovic         ###   ########.fr       */
+/*   Updated: 2026/02/27 16:00:17 by efittant         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -315,8 +315,10 @@ void CommandHandler::chatCommands(std::vector<std::string> &cmdTokens, Client &c
 			break;
 		case WHOIS:
 			caseWHOIS(client, cmdTokens);
+			break;
 		case NOTICE:
 			caseNOTICE(client, cmdTokens);
+			break;
 		case NICK:
 			caseNICK(client, cmdTokens);
 			break;
@@ -344,12 +346,16 @@ void CommandHandler::chatCommands(std::vector<std::string> &cmdTokens, Client &c
 			caseWHO(client, cmdTokens);
 			break;
 		case MODE:
-			if (cmdTokens.size() > 1 && cmdTokens[1][0] != '&' && cmdTokens[1][0] != '#')
+			if (cmdTokens.size() > 1 && cmdTokens[1][0] != '&' && cmdTokens[1][0] != '#'){
 				break;
+			}
 			caseMODE(client, cmdTokens);
 			break;
 		case PRIVMSG://* FOR ALL MESSAGES -> both channel or private goes through here!
 			casePRIVMSG(client, cmdTokens);
+			break;
+		case PART:
+			casePART(client, cmdTokens);
 			break;
 		case UNKNOWN:
 			caseUNKNOWN(client, cmdTokens);

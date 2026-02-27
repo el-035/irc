@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandHandlerChannelControl.cpp                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
+/*   By: efittant <efittant@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/25 17:24:43 by dbogovic          #+#    #+#             */
-/*   Updated: 2026/02/25 19:03:37 by dbogovic         ###   ########.fr       */
+/*   Updated: 2026/02/27 15:52:29 by efittant         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -227,7 +227,7 @@ void CommandHandler::caseJOIN(Client &client, std::vector<std::string> &cmdToken
 		std::map<std::string, Channel>::iterator curChan = _channels.find(cmdTokens[1]);
 		bool chanCreated = false;
 		if (curChan == _channels.end())	{
-			//create channel		//SET EVERYTIHNF BITTE
+			//create channel
 			_channels[cmdTokens[1]];
 			chanCreated = true;
 			curChan = _channels.find(cmdTokens[1]);
@@ -276,6 +276,10 @@ void CommandHandler::caseJOIN(Client &client, std::vector<std::string> &cmdToken
 		if (!chanCreated)
 			curChan->second.clients[client.getFd()] = false;
 
+		//add user to clients side list of channels joined 
+		std::map<int, Client>::iterator curClient = _clients.find(client.getFd());
+		curClient->second.channelsJoined.push_back(cmdTokens[1]);
+
 		//confirmation of joining EVERYONE ON CHANNEL
 		std::string joined = ":" + client.getNickname() + "!" + client.getUsername() + "@localhost JOIN " + cmdTokens[1] + "\r\n";
 		for (std::map<int, bool>::iterator it = curChan->second.clients.begin(); it != curChan->second.clients.end(); ++it){
@@ -290,8 +294,10 @@ void CommandHandler::caseJOIN(Client &client, std::vector<std::string> &cmdToken
 			client.appendToWriteBuffer(topic);
 		}
 		else{
-			std::string topic = ":ircserv 331 " + client.getNickname() + " " + cmdTokens[1] + " :No topic is set\r\n";
+			std::string topic = ":ircserv 332 " + client.getNickname() + " " + cmdTokens[1] +  " :No topic is set\r\n";
 			client.appendToWriteBuffer(topic);
+			/* std::string topic = ":ircserv 331 " + client.getNickname() + " " + cmdTokens[1] + " :No topic is set\r\n";
+			client.appendToWriteBuffer(topic); */
 		}
 
 		//print list of users
@@ -336,6 +342,8 @@ bool CommandHandler::validateModeToken(std::vector<std::string>& cmdTokens){
 	if (cmdTokens.size() < 2)
 		return false;
 	if (cmdTokens.size() > 2){
+		if (cmdTokens[2] == "b")
+			return true;
 		if (cmdTokens[2][0] != '+' && cmdTokens[2][0] != '-')
 			return false;
 		if (cmdTokens[2][1] != 'l' && cmdTokens[2][1] != 'k' && cmdTokens[2][1] != 'i' && cmdTokens[2][1] != 't' && cmdTokens[2][1] != 'o')
@@ -374,7 +382,9 @@ void	CommandHandler::sendModes(Client& client, std::string& chanName, Channel& c
 		modes += "l";
 		extra += " " + ss.str();
 	}
-	if (!modes.empty())
+	if (modes.empty())
+		modes = " +";
+	else
 		modes = " +" + modes;
 	extra += "\r\n";
 	std::string str = ":ircserv 324 " + client.getNickname() + " " + chanName + modes + extra;
@@ -471,8 +481,16 @@ void CommandHandler::caseMODE(Client& client, std::vector<std::string>& cmdToken
 			throw(errMsg(ERR_NOTONCHANNEL, client.getNickname(), cmdTokens[1], MSG_NOTONCHANNEL, ""));
 
 		//if no modes, print them
-		if (cmdTokens.size() == 2)
-			return (sendModes(client, cmdTokens[1], curChan->second));
+		if (cmdTokens.size() == 2){
+			sendModes(client, cmdTokens[1], curChan->second);
+			return ;
+		}
+
+		if (cmdTokens.size() == 3 && cmdTokens[2] == "b"){
+			std::string msg = ":ircserv 368 " + client.getNickname() + " " + cmdTokens[1] + " :End of channel ban list.\r\n";
+			client.appendToWriteBuffer(msg);
+			return;
+		}
 
 		//check if client is operator
 		if (curClien->second == false)
@@ -500,12 +518,12 @@ void CommandHandler::caseWHO(Client &client, std::vector<std::string> &cmdTokens
 	try{
 		if (cmdTokens.size() < 2)
 			throw(errMsg(ERR_NEEDMOREPARAMS, client.getNickname(), cmdTokens[0], MSG_NEEDMOREPARAMS , ""));
-	
+
 		//Check if channel exists
 		std::map<std::string, Channel>::iterator curChan = _channels.find(cmdTokens[1]);
 		if (curChan == _channels.end())
 			throw(errMsg(ERR_NOSUCHCHANNEL, client.getNickname(), cmdTokens[1], MSG_NOSUCHCHANNEL, ""));
-		
+
 		//send reply
 		for (std::map<int, bool>::iterator it = curChan->second.clients.begin(); it != curChan->second.clients.end(); ++it){
 			int fd = it->first;
@@ -518,7 +536,6 @@ void CommandHandler::caseWHO(Client &client, std::vector<std::string> &cmdTokens
 			if (it->second == true)
 				flag += "@";
 
-		
 			std::string msg = ":ircserv 352 " + client.getNickname() + " " + cmdTokens[1] + " " + user->second.getUsername() + " localhost ircserv " + user->second.getNickname() + flag + " :0 " + user->second.getRealname() + "\r\n";
 			client.appendToWriteBuffer(msg);
 		}
@@ -529,4 +546,56 @@ void CommandHandler::caseWHO(Client &client, std::vector<std::string> &cmdTokens
 	catch(const std::string& msg){
 		client.appendToWriteBuffer(msg);
 	}
+}
+
+//PART #channel
+void CommandHandler::casePART(Client &client, std::vector<std::string> &cmdTokens){
+	try{
+		//check parameters
+		if (cmdTokens.size() < 2)
+			throw(errMsg(ERR_NEEDMOREPARAMS, client.getNickname(), cmdTokens[0], MSG_NEEDMOREPARAMS , ""));
+
+		//Check if channel exists
+		std::map<std::string, Channel>::iterator curChan = _channels.find(cmdTokens[1]);
+		if (curChan == _channels.end())
+			throw(errMsg(ERR_NOSUCHCHANNEL, client.getNickname(), cmdTokens[1], MSG_NOSUCHCHANNEL, ""));
+
+		//check if client is part of channel
+		std::map<int, bool>::iterator curClien = curChan->second.clients.find(client.getFd());
+		if (curClien == curChan->second.clients.end())
+			throw(errMsg(ERR_NOTONCHANNEL, client.getNickname(), cmdTokens[1], MSG_NOTONCHANNEL, ""));
+		
+		//broadcast message to everyone on channel
+		std::string topMsg = ":" + client.getNickname() + "!" + client.getUsername() + "@localhost PART " + cmdTokens[1] + "\r\n";
+		for (std::map<int, bool>::iterator it = curChan->second.clients.begin(); it != curChan->second.clients.end(); ++it){
+			std::map<int, Client>::iterator fdIt = _clients.find(it->first);
+			if (fdIt != _clients.end())
+				fdIt->second.appendToWriteBuffer(topMsg);
+		}
+		//delete client from channel
+		curChan->second.clients.erase(client.getFd());
+		std::map<int, Client>::iterator curClient = _clients.find(client.getFd());
+		curClient->second.channelsJoined.remove(cmdTokens[1]);
+	
+		//if channel empty delete channel
+		deleteEmptyChannel(cmdTokens[1]);
+	}
+	catch(const std::string& msg){
+		client.appendToWriteBuffer(msg);
+	}
+}
+
+
+void CommandHandler::deleteEmptyChannel(std::string channelName){
+	//find if channel exists
+	std::map<std::string, Channel>::iterator curChan = _channels.find(channelName);
+	if (curChan == _channels.end())
+		return ;
+	
+	//check if channel is not empty
+	if (!curChan->second.clients.empty())
+		return ;
+	
+	//delete empty channel
+	_channels.erase(curChan);
 }
