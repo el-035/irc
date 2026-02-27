@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
+/*   By: efittant <efittant@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/25 17:15:57 by dbogovic          #+#    #+#             */
-/*   Updated: 2026/02/25 17:16:02 by dbogovic         ###   ########.fr       */
+/*   Updated: 2026/02/27 15:42:05 by efittant         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 #include <string>
 #include <sys/socket.h>
+#include <list>
 
 class Client
 {
@@ -27,7 +28,7 @@ class Client
 		bool			registered;
 		std::string		write_buffer;
 		std::string		read_buffer;
-
+		
 	public:
 		Client(const Client& other);
 		Client& operator=(const Client& other);
@@ -35,6 +36,7 @@ class Client
 		Client(int f);
 		~Client();
 
+		std::list<std::string> channelsJoined;
 		int getFd() const;
 		std::string getNickname() const;
 		std::string getUsername() const;

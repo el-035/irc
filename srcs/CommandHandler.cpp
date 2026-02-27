@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandHandler.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
+/*   By: efittant <efittant@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/25 17:24:38 by dbogovic          #+#    #+#             */
-/*   Updated: 2026/02/25 19:10:05 by dbogovic         ###   ########.fr       */
+/*   Updated: 2026/02/27 15:25:26 by efittant         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -353,6 +353,9 @@ void CommandHandler::chatCommands(std::vector<std::string> &cmdTokens, Client &c
 			break;
 		case PRIVMSG://* FOR ALL MESSAGES -> both channel or private goes through here!
 			casePRIVMSG(client, cmdTokens);
+			break;
+		case PART:
+			casePART(client, cmdTokens);
 			break;
 		case UNKNOWN:
 			caseUNKNOWN(client, cmdTokens);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandHandlerUtils.cpp                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
+/*   By: efittant <efittant@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/25 17:24:15 by dbogovic          #+#    #+#             */
-/*   Updated: 2026/02/25 19:09:33 by dbogovic         ###   ########.fr       */
+/*   Updated: 2026/02/27 15:24:52 by efittant         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,11 +24,13 @@ int CommandHandler::cmdType(const std::string& cmd)
 	if (cmd == "KICK") return KICK;
 	if (cmd == "TOPIC") return TOPIC;
 	if (cmd == "MODE") return MODE;
-  if (cmd == "WHO") return WHO;
+	if (cmd == "WHO") return WHO;
 	if (cmd == "WHOIS") return WHOIS;
 	if (cmd == "PRIVMSG") return PRIVMSG;
 	if (cmd == "PING") return PING;
 	if (cmd == "NOTICE") return NOTICE;
+	if (cmd == "PART") return PART;
+	
 	return UNKNOWN;
 }
 
