@@ -1,9 +1,3 @@
-Verify that each call to fcntl() is done as follows: fcntl(fd, F_SETFL, O_NONBLOCK); Any other use of fcntl() is forbidden.
-
-Verify that the poll() (or equivalent) is called every time before each accept, read/recv, write/send. After these calls, errno should not be used to trigger specific action (e.g. like reading again after errno == EAGAIN).
-
-Using the 'nc' tool, you can connect to the server, send commands, and the server answers you back.
-
 Do some test with the IRC client and nc at the same time.
 
 Just like in the subject, using nc, try to send partial commands. Check that the server answers correctly. With a partial command sent, ensure that other connections still run fine.
@@ -21,10 +15,4 @@ Verify that private messages (PRIVMSG) are fully functional with different param
 ~~no topic is on status page when joijn channel
 
 
-
-INVITE ji #ko\r\n
-WHO #ko\r\n
-Unknown command from client 5: WHO
-MODE #ko b\r\n
-PING localhost\r\n
-Sent PONG to client 5
+if operator leaves channel who becomes operator?

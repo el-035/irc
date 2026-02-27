@@ -6,7 +6,7 @@
 /*   By: efittant <efittant@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/25 17:22:58 by dbogovic          #+#    #+#             */
-/*   Updated: 2026/02/27 16:33:40 by efittant         ###   ########.fr       */
+/*   Updated: 2026/02/27 18:03:56 by efittant         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ enum ChannelModes {
 
 struct Channel
 {
-	std::string 					name; //useless
+	std::string 					name;
 	std::string 					topic;
 	std::map<ChannelModes, bool> 	mode;
 	std::list<int> 					invited; 	//fro invide only mode, we know who has been invited
@@ -63,7 +63,6 @@ class CommandHandler
 	private:
 		std::map<int, Client>&	  		_clients;
 		std::string				 		_password;
-		//ChannelControl			 		 _channelControl;	//DELETE
 		std::map<std::string, Channel> 	_channels; // Map of channel name to Channel struct
 
 
