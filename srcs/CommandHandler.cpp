@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandHandler.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
+/*   By: efittant <efittant@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/25 17:24:38 by dbogovic          #+#    #+#             */
-/*   Updated: 2026/02/27 15:50:26 by dbogovic         ###   ########.fr       */
+/*   Updated: 2026/02/27 16:35:04 by efittant         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -204,6 +204,9 @@ void CommandHandler::runCommands(std::vector<std::string> &cmdTokens, Client &cl
 			break;
 		case WHO:
 			caseWHO(client, cmdTokens);
+			break;
+		case PART:
+			casePART(client, cmdTokens);
 			break;
 		case MODE:
 			if (cmdTokens.size() > 1 && cmdTokens[1][0] != '&' && cmdTokens[1][0] != '#')

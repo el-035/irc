@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
+/*   By: efittant <efittant@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/25 17:15:57 by dbogovic          #+#    #+#             */
-/*   Updated: 2026/02/26 16:31:06 by dbogovic         ###   ########.fr       */
+/*   Updated: 2026/02/27 16:32:21 by efittant         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ enum ClientState
 };
 #include <string>
 #include <sys/socket.h>
+#include <list>
 
 class Client
 {
@@ -41,6 +42,7 @@ class Client
 		Client(int f);
 		~Client();
 
+		std::list<std::string> channelsJoined;
 		int getFd() const;
 		std::string getNickname() const;
 		std::string getUsername() const;

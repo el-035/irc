@@ -39,4 +39,7 @@ re: fclean all
 val: all
 	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --track-fds=yes ./$(NAME) $(PORT) $(PASS)
 
-.PHONY: all clean fclean re val
+run: $(NAME)
+	./$(NAME) $(PORT) $(PASS)
+
+.PHONY: all clean fclean re val run

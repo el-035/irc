@@ -32,3 +32,10 @@ PING localhost\r\n
 Sent PONG to client 5
 
 maybe we broadcast to channel if someone changes their nick (if not implemented already)
+
+
+//TODO
+
+nickname changed everyone in the group is notifyed
+
+cannot kick myself out
