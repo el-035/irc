@@ -2,7 +2,13 @@ Do some test with the IRC client and nc at the same time.
 
 Verify that private messages (PRIVMSG) are fully functional with different parameters.
 
-~~no topic is on status page when joijn channel
 
-if operator leaves channel who becomes operator?
+remove flags from makefile
 
+
+Just like in the subject, using nc, try to send partial commands. Check that the server answers correctly. With a partial command sent, ensure that other connections still run fine.
+
+
+Unexpectedly kill a nc with just half of a command sent. Check again that the server is not in an odd state or blocked.
+
+try bottleneck terminal

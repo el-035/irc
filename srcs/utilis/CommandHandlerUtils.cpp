@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandHandlerUtils.cpp                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
+/*   By: efittant <efittant@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/25 17:24:15 by dbogovic          #+#    #+#             */
-/*   Updated: 2026/02/27 18:43:08 by dbogovic         ###   ########.fr       */
+/*   Updated: 2026/02/27 19:35:24 by efittant         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,24 +123,21 @@ void CommandHandler::updateGroup(int clientFd)
 {
 	std::vector<std::string> emptyChannels;
 
-	for (std::map<std::string, Channel>::iterator it = _channels.begin();
-		it != _channels.end();
-		++it)
-	{
+	//iterate through all channels
+	for (std::map<std::string, Channel>::iterator it = _channels.begin(); it != _channels.end(); ++it){
 		Channel& chan = it->second;
 
+		//delete disconnected channel if existing
 		std::map<int, bool>::iterator cit = chan.clients.find(clientFd);
 		if (cit != chan.clients.end())
 			chan.clients.erase(cit);
 		chan.invited.remove(clientFd);
 
+		//if channel is empty add to list to delete 
 		if (chan.clients.empty())
 			emptyChannels.push_back(it->first);
 	}
-	for (std::vector<std::string>::iterator eit = emptyChannels.begin();
-		eit != emptyChannels.end();
-		++eit)
-	{
+	
+	for (std::vector<std::string>::iterator eit = emptyChannels.begin(); eit != emptyChannels.end(); ++eit)
 		_channels.erase(*eit);
-	}
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandHandler.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
+/*   By: efittant <efittant@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/25 17:24:38 by dbogovic          #+#    #+#             */
-/*   Updated: 2026/02/27 18:15:06 by dbogovic         ###   ########.fr       */
+/*   Updated: 2026/02/27 19:35:16 by efittant         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -188,7 +188,6 @@ void CommandHandler::runCommands(std::vector<std::string> &cmdTokens, Client &cl
 			casePASS(client, cmdTokens);
 			break;
 		case OPER:
-			// Not implemented yet
 			break;
 		case JOIN:
 			caseJOIN(client, cmdTokens);
@@ -215,6 +214,8 @@ void CommandHandler::runCommands(std::vector<std::string> &cmdTokens, Client &cl
 			break;
 		case PRIVMSG:
 			casePRIVMSG(client, cmdTokens);
+			break;
+		case QUIT:
 			break;
 		case UNKNOWN:
 			caseUNKNOWN(client, cmdTokens);
@@ -251,7 +252,7 @@ void CommandHandler::processNewData(Client &client)
 		else
 			runCommands(cmdTokens, client);
 	}
-	if (client.getState() != AUTHENTICATED && client.getState() != REGISTERED && cmdTokens[0] != "CAP")
+	if (client.getState() != AUTHENTICATED && client.getState() != REGISTERED && (!cmdTokens.empty() && cmdTokens[0] != "CAP"))
 	{
 		std::cout << "2" << std::endl;
 		client.changeState(DISCONNECTING);
