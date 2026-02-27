@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   registration.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
+/*   By: efittant <efittant@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/26 15:42:38 by dbogovic          #+#    #+#             */
-/*   Updated: 2026/02/27 14:36:53 by dbogovic         ###   ########.fr       */
+/*   Updated: 2026/02/27 17:39:22 by efittant         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/Client.hpp"
 #include "../include/CommandHandler.hpp"
-
+#include<algorithm>
 #include <iostream>
 
 
@@ -87,6 +87,25 @@ void CommandHandler::caseNICK(Client &client, std::vector<std::string> &cmdToken
 		std::string msg = ":" + oldNick + "!" + client.getUsername() + "@localhost NICK :" + newNick + "\r\n";
 		client.appendToWriteBuffer(msg);
 		std::cout << "Nick changed: " << oldNick << " -> " << newNick << std::endl;
+		
+		//broadcast message to all clients with common channel
+		std::list<int> alreadySent;
+		for (std::list<std::string>::iterator chanName = client.channelsJoined.begin(); chanName != client.channelsJoined.end(); ++chanName){
+			std::map<std::string, Channel>::iterator curChan = _channels.find(*chanName);
+			if (curChan == _channels.end())
+				continue;
+			for (std::map<int, bool>::iterator curClient = curChan->second.clients.begin(); curClient != curChan->second.clients.end(); ++curClient){
+				if (curClient->first == client.getFd())
+					continue;
+				if (std::find(alreadySent.begin(), alreadySent.end(), curClient->first) != alreadySent.end())
+					continue;
+				std::map<int, Client>::iterator target = _clients.find(curClient->first);
+				if (target != _clients.end()){
+					target->second.appendToWriteBuffer(msg);
+					alreadySent.push_back(target->first);
+				}
+			}
+		}
 	}
 }
 
