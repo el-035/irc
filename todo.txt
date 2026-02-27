@@ -1,27 +1,8 @@
+Do some test with the IRC client and nc at the same time.
 
+Verify that private messages (PRIVMSG) are fully functional with different parameters.
 
+~~no topic is on status page when joijn channel
 
+if operator leaves channel who becomes operator?
 
-
-
-
-
-
-
-should a channel be deleted if there is nobody on it? - probably
-
-INVITE ji #ko\r\n
-WHO #ko\r\n
-Unknown command from client 5: WHO
-MODE #ko b\r\n
-PING localhost\r\n
-Sent PONG to client 5
-
-maybe we broadcast to channel if someone changes their nick (if not implemented already)
-
-
-//TODO
-
-nickname changed everyone in the group is notifyed
-
-cannot kick myself out

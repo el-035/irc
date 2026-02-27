@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   ServerUtils.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
+/*   By: efittant <efittant@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/25 17:19:21 by dbogovic          #+#    #+#             */
 /*   Updated: 2026/02/27 18:41:24 by dbogovic         ###   ########.fr       */
