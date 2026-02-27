@@ -6,7 +6,7 @@
 /*   By: efittant <efittant@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/25 17:24:38 by dbogovic          #+#    #+#             */
-/*   Updated: 2026/02/27 15:25:26 by efittant         ###   ########.fr       */
+/*   Updated: 2026/02/27 16:00:17 by efittant         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -224,7 +224,7 @@ void CommandHandler::casePING(Client &client, std::vector<std::string> &cmdToken
 	if (cmdTokens.size() > 1)
 	{
 		std::string token = cmdTokens[1];
-		std::string pong = ":ircserv PONG ircserv :" + token + "\r\n";	//i changed here but made no difference i guess
+		std::string pong = "PONG " + token + "\r\n";
 		client.appendToWriteBuffer(pong);
 	}
 }
