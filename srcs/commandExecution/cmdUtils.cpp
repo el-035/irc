@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   CommandHandlerUtils.cpp                            :+:      :+:    :+:   */
+/*   cmdUtils.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/25 17:24:15 by dbogovic          #+#    #+#             */
-/*   Updated: 2026/02/27 18:43:08 by dbogovic         ###   ########.fr       */
+/*   Updated: 2026/02/28 10:43:31 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,7 +83,6 @@ bool CommandHandler::commandComplete(const std::string& buffer)
 {
 	return buffer.find("\n") != std::string::npos;
 }
-
 
 std::vector<std::string> CommandHandler::extractCommand(std::string& buffer)
 {

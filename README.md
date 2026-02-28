@@ -88,5 +88,5 @@ Following are resources used in creation of this 42 school project:
 
 - [irssi manual](https://irssi.org/documentation/manual/)
 - [C++ reference](https://cppreference.com/)https://cppreference.com/
-- man irssi
+- linux man pages (eg. man irssi)
 - [ChatGPT](https://chatgpt.com/) - used as explanatory tool and in limited function as debugging tool

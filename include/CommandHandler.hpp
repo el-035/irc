@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandHandler.hpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: efittant <efittant@student.42.fr>          +#+  +:+       +#+        */
+/*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/25 17:22:58 by dbogovic          #+#    #+#             */
-/*   Updated: 2026/02/28 10:26:37 by efittant         ###   ########.fr       */
+/*   Updated: 2026/02/28 10:02:17 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,21 +65,18 @@ class CommandHandler
 		std::string				 		_password;
 		std::map<std::string, Channel> 	_channels; // Map of channel name to Channel struct
 
-		void sendWelcome(Client &client);
+		//mains
 		void runCommands(std::vector<std::string> &cmdTokens, Client &client);
-		void casePRIVMSG(Client &client, std::vector<std::string> &cmdTokens);
+		void executeCommand(ClientCommand type, std::vector<std::string> &cmdTokens, Client &client);
+		void attemptRegistration(Client &client);
+
+		//registration
+		void sendWelcome(Client &client);
 		void caseNICK(Client &client, std::vector<std::string> &cmdTokens);
 		void caseUSER(Client &client, std::vector<std::string> &cmdTokens);
 		void casePASS(Client &client, std::vector<std::string> &cmdTokens);
-		void casePING(Client &client, std::vector<std::string> &cmdTokens);
-		void caseUNKNOWN(Client &client, std::vector<std::string> &cmdTokens);
-		void broadcastToNickChange(Client &client, const std::string &msg);
 		void caseCAP(Client &client, std::vector<std::string> &cmdTokens);
-		std::vector<std::string> extractCommand(std::string& buffer);
-		bool commandComplete(const std::string& buffer);
-		ClientCommand cmdType(const std::string& cmd);
-		void executeCommand(ClientCommand type, std::vector<std::string> &cmdTokens, Client &client);
-
+		//channel related
 		void caseMODE(Client &client, std::vector<std::string> &cmdTokens);
 		void caseKICK(Client &client, std::vector<std::string> &cmdTokens);
 		void caseINVITE(Client &client, std::vector<std::string> &cmdTokens);
@@ -87,19 +84,26 @@ class CommandHandler
 		void caseJOIN(Client &client, std::vector<std::string> &cmdTokens);
 		void casePART(Client &client, std::vector<std::string> &cmdTokens);
 		void caseWHO(Client &client, std::vector<std::string> &cmdTokens);
+		//general commands
+		void caseUNKNOWN(Client &client, std::vector<std::string> &cmdTokens);
+		void casePING(Client &client, std::vector<std::string> &cmdTokens);
+		void casePRIVMSG(Client &client, std::vector<std::string> &cmdTokens);
 		void caseWHOIS(Client &requester, std::vector<std::string> &cmdTokens);
 		void caseNOTICE(Client &sender, std::vector<std::string> &cmdTokens);
-		void attemptRegistration(Client &client);
+		//utils
+		void broadcastToNickChange(Client &client, const std::string &msg);
+		std::vector<std::string> extractCommand(std::string& buffer);
+		bool commandComplete(const std::string& buffer);
+		ClientCommand cmdType(const std::string& cmd);
 		void deleteEmptyChannel(std::string channelName);
 		bool channelSyntax(const std::string& name);
 		bool hasTooLongToken(const std::vector<std::string>& tokens);
 		int getClientFdFromNick(std::string& Nickname);
-		std::vector <int> fetchChannelMembers(std::string channelName, int fd_sender);//* returns filled up vector list with all fd-s associated with a channel! if Channel doesnt exits, return list with only 1 member and its value is -1
+		std::vector <int> fetchChannelMembers(std::string channelName, int fd_sender);
 		bool validateModeToken(std::vector<std::string>& cmdTokens);
 		void	sendModes(Client& client, std::string& chanName, Channel& curChan);
 		std::string changeModes(Client& client, std::vector<std::string>& cmdTokens, Channel& curChan);
 		std::string errMsg(int errCode,const std::string &ClientNick,const std::string &token,const std::string &msg, const std::string& extra);
-
 	public:
 		bool isChannel(const std::string& target);
 		CommandHandler(std::map<int, Client> &clients, const std::string& password);

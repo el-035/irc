@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/25 17:17:23 by dbogovic          #+#    #+#             */
-/*   Updated: 2026/02/27 11:57:41 by dbogovic         ###   ########.fr       */
+/*   Updated: 2026/02/28 10:58:14 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #define SERVER_HPP
 
 #include "Client.hpp"
+#include "CommandHandler.hpp"
 #include <string>
 #include <poll.h>
 #include <vector>
@@ -55,17 +56,17 @@ class Server
 		std::string					_password;
 
 		void		AddNewClient();
-		void		DisconnectClient(int fd);
-		ServerEnum	writeToClient(Client &client);
+		void		DisconnectClient(int fd, CommandHandler& cmd_h);
+		ServerEnum	writeToClient(Client &client, CommandHandler& cmd_h);
 		void		closeAllFds();
-		void		signalSetup(void);
+		int		signalSetup(void);
 		bool		currentClienthasData(int i);
 		ServerEnum	newData(int i);
 		ServerEnum	newDataIs(int i);
 		ServerEnum	clientReadRdy(int i);
 		bool		isBuffEmpty(int i);
 		bool		errorOccured(int i);
-		ServerEnum	readClientsData(int i);
+		ServerEnum	readClientsData(int i, CommandHandler& cmd_h);
 		void		updatePollEvents();
 
 		Server(const Server& other);
