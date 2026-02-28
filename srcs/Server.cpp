@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/25 17:19:00 by dbogovic          #+#    #+#             */
-/*   Updated: 2026/02/27 18:44:25 by dbogovic         ###   ########.fr       */
+/*   Updated: 2026/02/28 09:46:55 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,10 +26,6 @@
 //#include <fcntl.h>
 
 volatile sig_atomic_t g_server_stop = 0;
-
-Server::Server(int port, const std::string& password) : _port(port), _password(password)
-{
-}
 
 void handle_signal (int sig)
 {
@@ -71,7 +67,7 @@ void Server::ServerStart()
 		if (poll(&_pollfds[0], _pollfds.size(), -1) == -1)
 		{
 			if (g_server_stop == 1)
-			break;
+				break;
 			if (errno == EINTR)
 				continue;
 			throw(std::runtime_error("Error: poll() failed!"));
@@ -92,7 +88,7 @@ void Server::ServerStart()
 			{
 				if (writeToClient(cli) == CONNECTION_CLOSED)
 				{
-					cmdHandler.updateGroup(fd);
+					//cmdHandler.updateGroup(fd);
 					--i;
 					continue;
 				}
@@ -107,7 +103,7 @@ void Server::ServerStart()
 				{
 					if (readClientsData(i) == CONNECTION_CLOSED)
 					{
-						cmdHandler.updateGroup(fd);
+					//	cmdHandler.updateGroup(fd);
 						--i;
 						continue;
 					}

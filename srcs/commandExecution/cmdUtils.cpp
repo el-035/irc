@@ -13,6 +13,19 @@
 #include "../../include/CommandHandler.hpp"
 #include<iostream>
 
+bool CommandHandler::isChannel(const std::string& target)
+{
+	if (target.empty())
+		return false;
+	std::string prefixes = "#&!+";
+
+	if (prefixes.find(target[0]) != std::string::npos)
+	{
+		return true;
+	}
+	return false;
+}
+
 bool CommandHandler::hasTooLongToken(const std::vector<std::string>& tokens)
 {
 	if (tokens.size() > MAX_PARAMS)
@@ -36,7 +49,7 @@ bool CommandHandler::hasTooLongToken(const std::vector<std::string>& tokens)
 	return false;
 }
 
-int CommandHandler::cmdType(const std::string& cmd)
+ClientCommand CommandHandler::cmdType(const std::string& cmd)
 {
 	if (cmd == "NICK") return NICK;
 	if (cmd == "CAP") return CAP;
@@ -68,7 +81,7 @@ int CommandHandler::findUsingName(std::string name)
 
 bool CommandHandler::commandComplete(const std::string& buffer)
 {
-	return buffer.find("\r\n") != std::string::npos;
+	return buffer.find("\n") != std::string::npos;
 }
 
 
@@ -144,3 +157,21 @@ void CommandHandler::updateGroup(int clientFd)
 		_channels.erase(*eit);
 	}
 }
+
+CommandHandler::CommandHandler(const CommandHandler& other)
+		: _clients(other._clients),
+			_password(other._password),
+			_channels(other._channels)
+{}
+
+CommandHandler& CommandHandler::operator=(const CommandHandler& other)
+{
+		if (this != &other)
+		{
+			_password = other._password;
+			_channels = other._channels;
+		}
+		return *this;
+	}
+
+CommandHandler::~CommandHandler() {}

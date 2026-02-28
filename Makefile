@@ -3,13 +3,18 @@ CXX = c++
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -g
 
 # If you want to use the Sanitizer, uncomment the next two lines:
+
+# CXXFLAGS += -fsanitize=address
+# LDFLAGS += -fsanitize=address
+
 CXXFLAGS += -fsanitize=address
 LDFLAGS += -fsanitize=address
 
+
 SRC = srcs/main.cpp srcs/utilis/inputParse.cpp srcs/Server.cpp \
-		srcs/utilis/ServerUtils.cpp srcs/CommandHandler.cpp \
-		srcs/utilis/CommandHandlerUtils.cpp srcs/Client.cpp \
-		srcs/CommandHandlerChannelControl.cpp srcs/registration.cpp
+		srcs/utilis/ServerUtils.cpp srcs/commandExecution/CommandHandler.cpp \
+		srcs/commandExecution/cmdUtils.cpp srcs/Client.cpp \
+		srcs/commandExecution/cmdChannels.cpp srcs/commandExecution/cmdRegistration.cpp srcs/commandExecution/cmdOthers.cpp
 
 OBJ = $(SRC:.cpp=.o)
 NAME = ircserv

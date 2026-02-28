@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandHandler.hpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
+/*   By: efittant <efittant@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/25 17:22:58 by dbogovic          #+#    #+#             */
-/*   Updated: 2026/02/27 18:43:48 by dbogovic         ###   ########.fr       */
+/*   Updated: 2026/02/28 10:26:37 by efittant         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 #include <string>
 #include <list>
 
-enum ClientCommand {
+enum ClientCommand{
 	NICK,
 	CAP,
 	USER,
@@ -49,7 +49,7 @@ enum ChannelModes {
 
 struct Channel
 {
-	std::string 					name; //useless
+	std::string 					name;
 	std::string 					topic;
 	std::map<ChannelModes, bool> 	mode;
 	std::list<int> 					invited; 	//fro invide only mode, we know who has been invited
@@ -66,17 +66,19 @@ class CommandHandler
 		std::map<std::string, Channel> 	_channels; // Map of channel name to Channel struct
 
 		void sendWelcome(Client &client);
+		void runCommands(std::vector<std::string> &cmdTokens, Client &client);
 		void casePRIVMSG(Client &client, std::vector<std::string> &cmdTokens);
 		void caseNICK(Client &client, std::vector<std::string> &cmdTokens);
 		void caseUSER(Client &client, std::vector<std::string> &cmdTokens);
 		void casePASS(Client &client, std::vector<std::string> &cmdTokens);
 		void casePING(Client &client, std::vector<std::string> &cmdTokens);
 		void caseUNKNOWN(Client &client, std::vector<std::string> &cmdTokens);
-		void runCommands(std::vector<std::string> &cmdTokens, Client &client);
+		void broadcastToNickChange(Client &client, const std::string &msg);
 		void caseCAP(Client &client, std::vector<std::string> &cmdTokens);
 		std::vector<std::string> extractCommand(std::string& buffer);
 		bool commandComplete(const std::string& buffer);
-		int cmdType(const std::string& cmd);
+		ClientCommand cmdType(const std::string& cmd);
+		void executeCommand(ClientCommand type, std::vector<std::string> &cmdTokens, Client &client);
 
 		void caseMODE(Client &client, std::vector<std::string> &cmdTokens);
 		void caseKICK(Client &client, std::vector<std::string> &cmdTokens);
@@ -87,7 +89,7 @@ class CommandHandler
 		void caseWHO(Client &client, std::vector<std::string> &cmdTokens);
 		void caseWHOIS(Client &requester, std::vector<std::string> &cmdTokens);
 		void caseNOTICE(Client &sender, std::vector<std::string> &cmdTokens);
-
+		void attemptRegistration(Client &client);
 		void deleteEmptyChannel(std::string channelName);
 		bool channelSyntax(const std::string& name);
 		bool hasTooLongToken(const std::vector<std::string>& tokens);
@@ -96,8 +98,10 @@ class CommandHandler
 		bool validateModeToken(std::vector<std::string>& cmdTokens);
 		void	sendModes(Client& client, std::string& chanName, Channel& curChan);
 		std::string changeModes(Client& client, std::vector<std::string>& cmdTokens, Channel& curChan);
+		std::string errMsg(int errCode,const std::string &ClientNick,const std::string &token,const std::string &msg, const std::string& extra);
 
 	public:
+		bool isChannel(const std::string& target);
 		CommandHandler(std::map<int, Client> &clients, const std::string& password);
 		void processNewData(Client &client);
 		int findUsingName(std::string name);

@@ -1,17 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   CommandHandlerChannelControl.cpp                   :+:      :+:    :+:   */
+/*   cmdChannels.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: efittant <efittant@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/25 17:24:43 by dbogovic          #+#    #+#             */
-/*   Updated: 2026/02/27 15:52:29 by efittant         ###   ########.fr       */
+/*   Updated: 2026/02/28 10:26:14 by efittant         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/Client.hpp"
-#include "../include/CommandHandler.hpp"
+#include "../../include/Client.hpp"
+#include "../../include/CommandHandler.hpp"
 #include <iostream>
 #include <sstream>
 #include <algorithm>
@@ -25,7 +25,7 @@ int CommandHandler::getClientFdFromNick(std::string& Nickname){
 };
 
 
-std::string errMsg(int errCode,const std::string &ClientNick,const std::string &token,const std::string &msg, const std::string& extra){
+std::string CommandHandler::errMsg(int errCode,const std::string &ClientNick,const std::string &token,const std::string &msg, const std::string& extra){
 	std::stringstream ss;
     ss << errCode;
 
@@ -66,6 +66,10 @@ void CommandHandler::caseKICK(Client &client, std::vector<std::string> &cmdToken
 			throw(errMsg(ERR_USERNOTINCHANNEL, client.getNickname(), cmdTokens[2], MSG_USERNOTINCHANNEL, extra));
 		}
 
+		//check if client is user
+		if (userFd == client.getFd())
+			throw(errMsg(ERR_CHANOPRIVSNEEDED, client.getNickname(), cmdTokens[1], " :Cannot kick yourself out\r\n", ""));
+			
 		//send msg to all clients
 		std::string reason;
 		if (cmdTokens.size() > 3){
@@ -236,7 +240,6 @@ void CommandHandler::caseJOIN(Client &client, std::vector<std::string> &cmdToken
 			curChan->second.key = "";
 			curChan->second.limit = 200;
 			curChan->second.clients[client.getFd()] = true;
-			//return ;
 		}
 
 		//check if client is already part of channel
