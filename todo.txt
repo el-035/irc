@@ -2,9 +2,6 @@ Do some test with the IRC client and nc at the same time.
 
 Verify that private messages (PRIVMSG) are fully functional with different parameters.
 
-~~no topic is on status page when joijn channel
-
-if operator leaves channel who becomes operator?
 
 if someone disconnects, should others be notified about their departure from group?
 
@@ -20,5 +17,3 @@ Unexpectedly kill a nc with just half of a command sent. Check again that the se
 try bottleneck terminal
 
 [#culo] /mode #culo +k  --> what should happen?
-
-what happens if limit set to less than current members
