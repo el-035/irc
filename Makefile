@@ -41,10 +41,10 @@ fclean: clean
 re: fclean all
 
 # Only run this if -fsanitize=address is COMMENTED OUT above
-val: all
+val: fclean all
 	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --track-fds=yes ./$(NAME) $(PORT) $(PASS)
 
-run: $(NAME)
+run: fclean all
 	./$(NAME) $(PORT) $(PASS)
 
 .PHONY: all clean fclean re val run

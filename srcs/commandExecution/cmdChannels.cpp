@@ -6,7 +6,7 @@
 /*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/25 17:24:43 by dbogovic          #+#    #+#             */
-/*   Updated: 2026/02/28 10:01:32 by dbogovic         ###   ########.fr       */
+/*   Updated: 2026/02/28 10:57:25 by efittant         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -468,7 +468,7 @@ std::string CommandHandler::changeModes(Client& client, std::vector<std::string>
 	return update;
 }
 
-//MODE channel letter [key]
+//MODE channel flag [key]
 void CommandHandler::caseMODE(Client& client, std::vector<std::string>& cmdTokens){
 	try{
 		if (!validateModeToken(cmdTokens))
@@ -503,7 +503,7 @@ void CommandHandler::caseMODE(Client& client, std::vector<std::string>& cmdToken
 		//save mode in struct
 		std::string update = changeModes(client, cmdTokens, curChan->second);
 		if (!update.empty()){
-			std::string msg = ":" + client.getNickname() + " MODE " + cmdTokens[1] + update;
+			std::string msg = ":" + client.getNickname() + " MODE " + cmdTokens[1] + " " + update;
 			//TO ALL CLIENTS
 			for (std::map<int, bool>::iterator it = curChan->second.clients.begin(); it != curChan->second.clients.end(); ++it){
 				std::map<int, Client>::iterator clie = _clients.find(it->first);

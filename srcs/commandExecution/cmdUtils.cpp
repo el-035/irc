@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cmdUtils.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
+/*   By: efittant <efittant@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/25 17:24:15 by dbogovic          #+#    #+#             */
-/*   Updated: 2026/02/28 10:43:31 by dbogovic         ###   ########.fr       */
+/*   Updated: 2026/02/28 11:24:33 by efittant         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,9 +135,7 @@ void CommandHandler::updateGroup(int clientFd)
 {
 	std::vector<std::string> emptyChannels;
 
-	for (std::map<std::string, Channel>::iterator it = _channels.begin();
-		it != _channels.end();
-		++it)
+	for (std::map<std::string, Channel>::iterator it = _channels.begin(); it != _channels.end(); ++it)
 	{
 		Channel& chan = it->second;
 
@@ -149,12 +147,8 @@ void CommandHandler::updateGroup(int clientFd)
 		if (chan.clients.empty())
 			emptyChannels.push_back(it->first);
 	}
-	for (std::vector<std::string>::iterator eit = emptyChannels.begin();
-		eit != emptyChannels.end();
-		++eit)
-	{
+	for (std::vector<std::string>::iterator eit = emptyChannels.begin(); eit != emptyChannels.end(); ++eit)
 		_channels.erase(*eit);
-	}
 }
 
 CommandHandler::CommandHandler(const CommandHandler& other)
