@@ -6,7 +6,7 @@
 /*   By: efittant <efittant@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/25 17:19:00 by dbogovic          #+#    #+#             */
-/*   Updated: 2026/02/28 12:28:43 by efittant         ###   ########.fr       */
+/*   Updated: 2026/02/28 13:00:12 by efittant         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,7 +131,7 @@ void Server::Initialize()
 		close(_server_fd);
 		throw(std::runtime_error("Error: setsockopt(): Creating server failed!"));
 	}
-	fcntl(_server_fd, F_SETFL, O_NONBLOCK);
+	if (fcntl(_server_fd, F_SETFL, O_NONBLOCK) == -1)
 	{
 		close(_server_fd);
 		throw(std::runtime_error("Error: fcntl(): Could not set non-blocking mode"));

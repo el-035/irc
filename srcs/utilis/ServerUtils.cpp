@@ -6,7 +6,7 @@
 /*   By: efittant <efittant@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/25 17:19:21 by dbogovic          #+#    #+#             */
-/*   Updated: 2026/02/28 12:28:08 by efittant         ###   ########.fr       */
+/*   Updated: 2026/02/28 13:01:06 by efittant         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,7 +116,7 @@ void Server::AddNewClient()
 		std::cerr << "Error: accept() fatal\n";
 		return ;
 	}
-	fcntl(new_fd, F_SETFL, O_NONBLOCK);
+	if (fcntl(new_fd, F_SETFL, O_NONBLOCK) == -1)
 	{
 		close(new_fd);
 		std::cerr << "Error: fcntl(); cannot set non-blocking mode for client.\n";
