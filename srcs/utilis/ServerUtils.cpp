@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerUtils.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
+/*   By: efittant <efittant@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/25 17:19:21 by dbogovic          #+#    #+#             */
-/*   Updated: 2026/02/28 10:58:51 by dbogovic         ###   ########.fr       */
+/*   Updated: 2026/02/28 12:28:08 by efittant         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 #include <unistd.h>
 #include <vector>
 #include <cerrno>
-//#include <fcntl.h>
+#include <fcntl.h>
 
 Server::Server(int port, const std::string& password) : _port(port), _password(password){}
 Server::Server(const Server& other) {(void)other;}
@@ -116,11 +116,11 @@ void Server::AddNewClient()
 		std::cerr << "Error: accept() fatal\n";
 		return ;
 	}
-/*	fcntl(new_fd, F_SETFL, O_NONBLOCK);
+	fcntl(new_fd, F_SETFL, O_NONBLOCK);
 	{
 		close(new_fd);
 		std::cerr << "Error: fcntl(); cannot set non-blocking mode for client.\n";
-	}*/
+	}
 	pollfd pfd;
 	pfd.fd = new_fd;
 	pfd.events = POLLIN;

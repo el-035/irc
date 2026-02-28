@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
+/*   By: efittant <efittant@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/25 17:19:00 by dbogovic          #+#    #+#             */
-/*   Updated: 2026/02/28 10:58:38 by dbogovic         ###   ########.fr       */
+/*   Updated: 2026/02/28 12:28:43 by efittant         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@
 #include <unistd.h>
 #include <vector>
 #include <cerrno>
-//#include <fcntl.h>
+#include <fcntl.h>
 
 volatile sig_atomic_t g_server_stop = 0;
 
@@ -131,11 +131,11 @@ void Server::Initialize()
 		close(_server_fd);
 		throw(std::runtime_error("Error: setsockopt(): Creating server failed!"));
 	}
-	/*fcntl(_server_fd, F_SETFL, O_NONBLOCK);
+	fcntl(_server_fd, F_SETFL, O_NONBLOCK);
 	{
 		close(_server_fd);
 		throw(std::runtime_error("Error: fcntl(): Could not set non-blocking mode"));
-	}*/
+	}
 
 	sockaddr_in adress;
 	adress.sin_family = AF_INET;

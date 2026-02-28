@@ -3,9 +3,6 @@ Do some test with the IRC client and nc at the same time.
 Verify that private messages (PRIVMSG) are fully functional with different parameters.
 
 
-if someone disconnects, should others be notified about their departure from group?
-
-
 remove flags from makefile
 
 
@@ -13,7 +10,3 @@ Just like in the subject, using nc, try to send partial commands. Check that the
 
 
 Unexpectedly kill a nc with just half of a command sent. Check again that the server is not in an odd state or blocked.
-
-try bottleneck terminal
-
-[#culo] /mode #culo +k  --> what should happen?

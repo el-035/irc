@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cmdChannels.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
+/*   By: efittant <efittant@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/25 17:24:43 by dbogovic          #+#    #+#             */
-/*   Updated: 2026/02/28 10:57:25 by efittant         ###   ########.fr       */
+/*   Updated: 2026/02/28 11:33:22 by efittant         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,6 @@ int CommandHandler::getClientFdFromNick(std::string& Nickname){
 	}
 	return -1;
 };
-
 
 std::string CommandHandler::errMsg(int errCode,const std::string &ClientNick,const std::string &token,const std::string &msg, const std::string& extra){
 	std::stringstream ss;
@@ -124,7 +123,7 @@ void CommandHandler::caseINVITE(Client &client, std::vector<std::string> &cmdTok
 		//check if client is already on channel
 		curClien = curChan->second.clients.find(userFd);
 		if (curClien != curChan->second.clients.end()){
-			std::string extra = " " + cmdTokens[2];			//DOUBLE CHECK
+			std::string extra = " " + cmdTokens[2];
 			throw(errMsg(ERR_USERONCHANNEL, client.getNickname(), cmdTokens[1], MSG_USERONCHANNEL, extra));
 		}
 
@@ -224,7 +223,7 @@ void CommandHandler::caseJOIN(Client &client, std::vector<std::string> &cmdToken
 			throw(errMsg(ERR_NEEDMOREPARAMS, client.getNickname(), cmdTokens[0], MSG_NEEDMOREPARAMS , ""));
 
 		//channel syntax rules
-		if (!channelSyntax(cmdTokens[1])) //to be tested still with nc
+		if (!channelSyntax(cmdTokens[1]))
 			throw(errMsg(ERR_BADCHANMASK, client.getNickname(), cmdTokens[1], MSG_BADCHANMASK , ""));
 
 		//check if channel exists
@@ -299,8 +298,6 @@ void CommandHandler::caseJOIN(Client &client, std::vector<std::string> &cmdToken
 		else{
 			std::string topic = ":ircserv 332 " + client.getNickname() + " " + cmdTokens[1] +  " :No topic is set\r\n";
 			client.appendToWriteBuffer(topic);
-			/* std::string topic = ":ircserv 331 " + client.getNickname() + " " + cmdTokens[1] + " :No topic is set\r\n";
-			client.appendToWriteBuffer(topic); */
 		}
 
 		//print list of users

@@ -1,15 +1,11 @@
 CXX = c++
-# remove -g later
-CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -g
+
+CXXFLAGS = -Wall -Wextra -Werror -std=c++98 #-g
 
 # If you want to use the Sanitizer, uncomment the next two lines:
 
 # CXXFLAGS += -fsanitize=address
 # LDFLAGS += -fsanitize=address
-
-CXXFLAGS += -fsanitize=address
-LDFLAGS += -fsanitize=address
-
 
 SRC = srcs/main.cpp srcs/utilis/inputParse.cpp srcs/Server.cpp \
 		srcs/utilis/ServerUtils.cpp srcs/commandExecution/CommandHandler.cpp \

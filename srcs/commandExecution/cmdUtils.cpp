@@ -6,12 +6,13 @@
 /*   By: efittant <efittant@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/25 17:24:15 by dbogovic          #+#    #+#             */
-/*   Updated: 2026/02/28 11:24:33 by efittant         ###   ########.fr       */
+/*   Updated: 2026/02/28 12:25:37 by efittant         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../include/CommandHandler.hpp"
 #include<iostream>
+#include<algorithm>
 
 bool CommandHandler::isChannel(const std::string& target)
 {
@@ -133,6 +134,33 @@ CommandHandler::CommandHandler(std::map<int, Client> &clients, const std::string
 
 void CommandHandler::updateGroup(int clientFd)
 {
+	//send disconnect message to all useres sharing channnel
+	std::map<int, Client>::iterator client = _clients.find(clientFd);
+	if (client == _clients.end())
+        return;
+	std::list<int> alreadySent;
+	
+	for(std::list<std::string>::iterator chanName = client->second.channelsJoined.begin(); chanName != client->second.channelsJoined.end(); ++chanName){
+		std::map<std::string, Channel>::iterator curChan = _channels.find(*chanName);
+		if (curChan == _channels.end())
+			continue ;
+		
+		std::string msg = ":" + client->second.getNickname() + "!" + client->second.getUsername() + "@localhost QUIT :Client disconnected\r\n";
+		
+		for (std::map<int, bool>::iterator curClient = curChan->second.clients.begin(); curClient != curChan->second.clients.end(); ++curClient){
+			if (curClient->first == clientFd)
+				continue;
+			if (std::find(alreadySent.begin(), alreadySent.end(), curClient->first) != alreadySent.end())
+				continue;
+			
+			std::map<int, Client>::iterator target = _clients.find(curClient->first);
+			if (target != _clients.end()){
+				target->second.appendToWriteBuffer(msg);
+				alreadySent.push_back(target->first);
+			}
+		}
+	}
+
 	std::vector<std::string> emptyChannels;
 
 	for (std::map<std::string, Channel>::iterator it = _channels.begin(); it != _channels.end(); ++it)
@@ -150,6 +178,8 @@ void CommandHandler::updateGroup(int clientFd)
 	for (std::vector<std::string>::iterator eit = emptyChannels.begin(); eit != emptyChannels.end(); ++eit)
 		_channels.erase(*eit);
 }
+
+
 
 CommandHandler::CommandHandler(const CommandHandler& other)
 		: _clients(other._clients),
