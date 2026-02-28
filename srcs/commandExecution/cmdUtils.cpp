@@ -84,7 +84,6 @@ bool CommandHandler::commandComplete(const std::string& buffer)
 	return buffer.find("\n") != std::string::npos;
 }
 
-
 std::vector<std::string> CommandHandler::extractCommand(std::string& buffer)
 {
 	std::cout << "SERVER 1: Entering extractCommand. Buffer size: " << buffer.size() << std::endl;

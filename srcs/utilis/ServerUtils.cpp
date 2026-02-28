@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerUtils.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: efittant <efittant@student.42.fr>          +#+  +:+       +#+        */
+/*   By: dbogovic <dbogovic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/25 17:19:21 by dbogovic          #+#    #+#             */
-/*   Updated: 2026/02/27 18:41:24 by dbogovic         ###   ########.fr       */
+/*   Updated: 2026/02/28 10:58:51 by dbogovic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ bool Server::currentClienthasData(int i)
 	return true;
 }
 
-ServerEnum Server::readClientsData(int i)
+ServerEnum Server::readClientsData(int i, CommandHandler& cmd_h)
 {
 	char buf[1024];
 	ssize_t b = recv(_pollfds[i].fd, buf, sizeof(buf), MSG_DONTWAIT);
@@ -76,7 +76,7 @@ ServerEnum Server::readClientsData(int i)
 	}
 	if (b == 0)
 	{
-		DisconnectClient(_pollfds[i].fd);
+		DisconnectClient(_pollfds[i].fd, cmd_h);
 		return CONNECTION_CLOSED;
 	}
 	if (b == -1)
@@ -86,7 +86,7 @@ ServerEnum Server::readClientsData(int i)
 		if (errno == EAGAIN || errno == EWOULDBLOCK)
 			return NO_DATA;
 		std::cerr << "Error: recv() fatal; closing client\n";
-		DisconnectClient(_pollfds[i].fd);
+		DisconnectClient(_pollfds[i].fd, cmd_h);
 		return CONNECTION_CLOSED;
 	}
 	return NO_DATA;
@@ -130,8 +130,9 @@ void Server::AddNewClient()
 	std::cout << "New client attempting to connect!\n";
 }
 
-void Server::DisconnectClient(int fd)
+void Server::DisconnectClient(int fd, CommandHandler& cmd_h)
 {
+	cmd_h.updateGroup(fd);
 	for (size_t i = 0; i < _pollfds.size(); ++i)
 	{
 		if (_pollfds[i].fd == fd)
@@ -145,7 +146,7 @@ void Server::DisconnectClient(int fd)
 	}
 }
 
-ServerEnum Server::writeToClient(Client &client)
+ServerEnum Server::writeToClient(Client &client, CommandHandler& cmd_h)
 {
 	std::string &buffer = client.getWriteBuffer();
 	if (buffer.empty()) return NO_DATA;
@@ -157,7 +158,7 @@ ServerEnum Server::writeToClient(Client &client)
 		buffer.erase(0, s);
 		if (buffer.empty() && client.getState() == DISCONNECTING)
 		{
-			DisconnectClient(client.getFd());
+			DisconnectClient(client.getFd(), cmd_h);
 			return CONNECTION_CLOSED;
 		}
 		return OK;
@@ -169,7 +170,7 @@ ServerEnum Server::writeToClient(Client &client)
 		if (errno == EAGAIN || errno == EWOULDBLOCK)
 			return ERROR;
 		std::cerr << "Error: send(); closing client\n" << std::endl;
-		DisconnectClient(client.getFd());
+		DisconnectClient(client.getFd(), cmd_h);
 		return CONNECTION_CLOSED;
 	}
 	return OK;
