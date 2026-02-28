@@ -32,15 +32,22 @@ This project is developed following the C++98 standard.
 - Operator privileges
 - Private messages
 - Basic IRC commands:
-  - PASS
   - NICK
-  - USER
-  - JOIN
-  - PRIVMSG
-  - KICK
-  - INVITE
-  - TOPIC
-  - MODE
+  -	CAP
+  -	USER
+  -	PASS
+  -	JOIN
+  -	PRIVMSG
+  -	PING
+  -	KICK
+  -	INVITE
+  -	TOPIC
+  - WHO
+  -	MODE
+  -	OPER
+  -	WHOIS
+  -	NOTICE
+  -	PART
 
 
 ### How It Works
@@ -67,7 +74,6 @@ The server:
 - C++ compiler (clang++ / g++)
 - Make
 - Unix-based system (Linux / macOS)
-  - (please note that this version is not yet fully optimized to work on macOS, implement fcntl(fd, F_SETFL, O_NONBLOCK); in Server.cpp init())
 
 ### Compile and run
 
@@ -75,6 +81,11 @@ Compile the project using `make`:
  - after generating the executable run it/start server using ./ircserv \<port\> \<password\>
  - password is restricted to 32 characters maximum, whitespace not allowed
  - port choice is restricted: 1024 - 65535 (to avoid needing to have root access or to avoid using privileged ports)
+
+Alternatively use `make run` to automatically run the program with
+- port: 2000
+- password: 2
+Note that port and password can be changed in the makefile under "PORT" and "PASS"
 
 ### Example
 
@@ -89,4 +100,5 @@ Following are resources used in creation of this 42 school project:
 - [irssi manual](https://irssi.org/documentation/manual/)
 - [C++ reference](https://cppreference.com/)https://cppreference.com/
 - linux man pages (eg. man irssi)
-- [ChatGPT](https://chatgpt.com/) - used as explanatory tool and in limited function as debugging tool
+- [ChatGPT](https://chatgpt.com/) - used as learning support
+- [rfc](https://www.rfc-editor.org/rfc/rfc1459.html)
