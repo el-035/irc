@@ -23,7 +23,7 @@ all: $(NAME)
 
 # Added $(LDFLAGS) here so Sanitizer works
 $(NAME): $(OBJ)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJ) -o $(NAME)
+	$(CXX) $(CXXFLAGS) $(OBJ) -o $(NAME)
 
 %.o: %.cpp $(HEADERS)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
